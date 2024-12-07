@@ -1,14 +1,13 @@
 # Aguarai: Sistema de Control para Vehículo Autónomo
 
 ## Descripción
-La libreria **Aguarai** es un sistema modular diseñado para gestionar y controlar los componentes de un modelo de vehículo autónomo personalizado hecho con un RaspberryPi 3 programado en C++. Este proyecto permite el manejo de motores, sensores y la captura de datos, proporcionando una solución escalable para desarrollar funcionalidades avanzadas como navegación autónoma.
+La libreria **Aguarai** es un sistema modular diseñado para gestionar y controlar los componentes de un modelo de vehículo autónomo personalizado hecho con un Raspberry Pi 3 programado en C++. Este proyecto permite el manejo de motores, sensores y la captura de datos, proporcionando una solución escalable para desarrollar funcionalidades avanzadas como navegación autónoma.
 
 ## Especificaciones
-RaspberryPi 3 con la libreria wiringPi, usando la distribucion del pinout BCM.
+Raspberry Pi 3 Model B V1.2 con la libreria wiringPi, usando la distribucion del pinout BCM.
 
 # Instalación de Aguarai
 
-## Descripción
 Aguarai depende de la biblioteca **WiringPi** para gestionar los pines GPIO. Este proyecto incluye un script de instalación que verifica e instala WiringPi automáticamente, si no está disponible en el sistema.
 
 ---
@@ -17,7 +16,7 @@ Aguarai depende de la biblioteca **WiringPi** para gestionar los pines GPIO. Est
 
 ### 1. Clonar el Repositorio
 Clona el repositorio de Aguarai en tu proyecto personal:
-```
+```bash
 git clone https://github.com/TeamAguarai/Aguarai
 ```
 
@@ -25,7 +24,7 @@ git clone https://github.com/TeamAguarai/Aguarai
 
 ### 2. Ejecutar el Script de Configuración
 Si no tienes WiringPi instalado en tu sistema, ejecuta el script `setup.sh` que se encuentra en el repositorio clonado:
-```
+```bash
 cd aguarai
 chmod +x setup.sh
 ./setup.sh
@@ -41,7 +40,7 @@ Este script realiza los siguientes pasos:
 
 ### 3. Incluir el Archivo de Cabecera
 Incluye el archivo principal de encabezado `aguarai.h` en tu código:
-```
+```cpp
 #include "aguarai/aguarai.h"
 ```
 
@@ -49,14 +48,14 @@ Incluye el archivo principal de encabezado `aguarai.h` en tu código:
 
 ### 4. Compilar Tu Proyecto
 Asegúrate de incluir los archivos fuente del proyecto Aguarai en el comando de compilación:
-```
+```bash
 g++ -std=c++11 -Iaguarai/include main.cpp aguarai/src/*.cpp -o aguarai_program
 ```
 
 ---
 
 ## Ejemplo de Código
-```
+```cpp
 #include "aguarai/aguarai.h"
 
 int main() {
