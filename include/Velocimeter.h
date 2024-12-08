@@ -2,6 +2,8 @@
 #define VELOCIMETER_H
 
 #include <time.h>
+#include <iostream>
+#include <chrono>
 
 class Velocimeter
 {

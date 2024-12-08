@@ -1,39 +1,42 @@
-#include <iostream>
-#include <fstream>
-#include <string>
+#include "../include/Writer.h"
+#include <sstream>
 
-class Writter {
-private:
-    std::ofstream file;      
-    bool is_open;            
-    std::string delimiter;
-public:
-    Writter(std::string filename, std::string header, std::string delim = ",") : is_open(true), delimiter(delim) {
-        file.open(filename);
-        file << header << "\n"; 
+Writer::Writer(std::string filename, std::string header, std::string delim) : is_open(false), delimiter(delim) {
+    file.open(filename);
+    if (file.is_open()) {
+        is_open = true;
+        file << header << "\n";
+    } else {
+        std::cerr << "Error: No se pudo abrir el archivo " << filename << "\n";
     }
+}
 
-    ~Writter() {
-        if (is_open) {
-            file.close();
+Writer::~Writer() {
+    if (is_open) file.close();
+}
+
+void Writer::write_row(const std::vector<std::string>& data) {
+    if (!is_open) {
+        std::cerr << "Error: El archivo no está abierto.\n";
+        return;
+    } 
+    std::ostringstream oss;
+    for (size_t i = 0; i < data.size(); ++i) {
+        oss << data[i];
+        if (i != data.size() - 1) {
+            oss << delimiter;
         }
     }
+    file << oss.str() << "\n";
+}
 
-    void write_row(int pulse_width, double speed) {
-        if (!is_open) {
-            std::cerr << "Error: El archivo no está abierto.\n";
-            return;
-        }
-        file << pulse_width << delimiter << speed << "\n";
+void Writer::close() {
+    if (is_open) {
+        file.close();
+        is_open = false;
     }
+}
 
-    void close() {
-        if (is_open) {
-            file.close();
-            is_open = false;
-        }
-    }
-};
 
 // int main() {
 //     // Crear una instancia de la clase CSVWriter

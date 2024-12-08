@@ -1,7 +1,5 @@
 #include "Velocimeter.h"
 #include "gpio.h"
-#include <iostream>
-#include <chrono>
 
 Velocimeter* velocimeterInstance = nullptr;
 
