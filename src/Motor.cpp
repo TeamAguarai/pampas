@@ -17,14 +17,17 @@ void Motor::definePulseWidthRange(double min, double steady, double max) {
 
 void Motor::setSpeed(float pulseWidth) 
 {
-    if (this->pulseWidth.isDefined() == false) throw std::invalid_argument( "You must fully define motor pulse-width values." );
+    if (this->pulseWidth.isDefined() == false) throw std::invalid_argument( "Faltan definir los valores de ancho de pulso." );
     gpio::pwmWrite(this->pin, this->pulseWidth.validate(pulseWidth));
     this->speed = pulseWidth;
 }
 
 void Motor::runForMilliseconds(int milliseconds, double pulseWidthMs) {
     double _speed = this->speed;
-    this->setSpeed(pulseWidthMs); 
-    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds)); 
-    this->setSpeed(_speed); 
+    std::thread([=]() {
+        this->setSpeed(pulseWidthMs); 
+        std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+        this->setSpeed(_speed); 
+    }).detach();
 }
+
