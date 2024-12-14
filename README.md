@@ -76,7 +76,7 @@ int main() {
 
 Con estos pasos, tendrás la librería Aguarai completamente instalada y lista para usarse en tu proyecto.
 
-## Clases y Métodos
+## Clases y Métodos (DESACTUALIZADO)
 
 ### **1. namespace gpio**
 **Propósito**: Gestionar los pines GPIO del sistema, incluyendo configuraciones de entrada/salida y señales PWM.
