@@ -15,7 +15,7 @@ void Motor::definePulseWidthRange(double min, double steady, double max) {
     this->pulseWidth.define(min, steady, max);
 }
 
-void Motor::setSpeed(float pulseWidth) 
+void Motor::setPulseWidth(double pulseWidth) 
 {
     if (this->pulseWidth.isDefined() == false) throw std::invalid_argument( "Faltan definir los valores de ancho de pulso." );
     gpio::pwmWrite(this->pin, this->pulseWidth.validate(pulseWidth));
@@ -25,9 +25,9 @@ void Motor::setSpeed(float pulseWidth)
 void Motor::runForMilliseconds(int milliseconds, double pulseWidthMs) {
     double _speed = this->speed;
     std::thread([=]() {
-        this->setSpeed(pulseWidthMs); 
+        this->setPulseWidth(pulseWidthMs); 
         std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
-        this->setSpeed(_speed); 
+        this->setPulseWidth(_speed); 
     }).detach();
 }
 

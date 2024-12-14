@@ -10,7 +10,7 @@ public:
     double speed;
     void definePin(int pin);
     void definePulseWidthRange(double min, double steady, double max);
-    void setSpeed(float pulseWidth);
+    void setPulseWidth(double pulseWidth);
     void runForMilliseconds(int milliseconds, double speed);
 };
 #endif
