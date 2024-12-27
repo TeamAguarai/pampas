@@ -14,6 +14,11 @@ Motor::Motor() {
     });
 }
 
+Motor::~Motor() 
+{
+    this->cleanup();
+}
+
 void Motor::cleanup() 
 {
     this->setPulseWidth(this->pulseWidth.steady);

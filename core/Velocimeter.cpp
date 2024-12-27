@@ -16,6 +16,11 @@ Velocimeter::Velocimeter()
 
 }
 
+Velocimeter::~Velocimeter() 
+{
+    this->cleanup();
+}
+
 void Velocimeter::cleanup() {
     gpio::stopOnInterrupt(velocimeterInstance->pin);
 }

@@ -9,6 +9,7 @@ class Motor
 private:
 public:
     Motor();
+    ~Motor();
     PulseWidth pulseWidth;
     int pin = -1;
     void definePin(int pin);
