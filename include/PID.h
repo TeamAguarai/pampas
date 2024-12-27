@@ -1,18 +1,41 @@
-#ifndef PID_H
-#define PID_H
+/* Creditos: https://github.com/pms67/PID/blob/master/PID.h */
+
+#ifndef PID_CONTROLLER_H
+#define PID_CONTROLLER_H
 
 #include <stdexcept>
 
 class PID {
 private:
-    double kp = 0, ki = 0, kd = 0;
-    double minOutput, maxOutput;
-    double integral, prevError; 
-    bool defined = false;
+    double Kp;     
+    double Ki;     
+    double Kd;     
+    double tau;    
+
+    double limMin;
+    double limMax;
+
+    double limMinInt;
+    double limMaxInt;
+
+    double sampleTime;
+
+    double integrator = 0;
+    double prevError = 0;
+    double differentiator = 0;
+    double prevMeasurement = 0;
+
+    double out;
+
+    bool gainsDefined = false;
+    bool paramsDefined = false;
+
 public:
-    bool isDefined();
-    void define(double kp, double ki, double kd, double minOutput, double maxOutput);
-    double calculate(double setpoint, double measuredValue);
+
+    PID();
+    void setGains(double kp, double ki, double kd);
+    void setParameters(double tau, double limMin, double limMax, double limMinInt, double limMaxInt);
+    double calculate(double setpoint, double measurement, double sampleTime);
 };
 
-#endif
+#endif 

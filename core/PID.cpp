@@ -1,47 +1,65 @@
+/* Creditos: https://github.com/pms67/PID/blob/master/PID.cpp */
+
 #include "PID.h"
 
-bool PID::isDefined() 
+
+PID::PID() 
 {
-    return this->defined;
+    integrator = 0.0f;
+    prevError = 0.0f;
+    differentiator = 0.0f;
+    prevMeasurement = 0.0f;
+    out = 0.0f;
 }
 
-void PID::define(double kp, double ki, double kd, double minOutput, double maxOutput) 
+double PID::calculate(double setpoint, double measurement, double sampleTime) 
 {
-    if (kp < 0 || ki < 0 || kd < 0) {
-        throw std::invalid_argument("Las constantes del PID deben ser mayores o iguales a cero.");
+    if (!gainsDefined) throw std::invalid_argument( "Faltan definir las ganancias del controlador PID" );
+    if (!paramsDefined) throw std::invalid_argument( "Faltan definir los parametros del controlador PID" );
+
+    double error = setpoint - measurement;
+    double proportional = Kp * error;
+    integrator += 0.5f * Ki * sampleTime * (error + prevError);
+
+    if (integrator > limMaxInt) {
+        integrator = limMaxInt;
+    } else if (integrator < limMinInt) {
+        integrator = limMinInt;
     }
 
-    this->kp = kp;
-    this->ki = ki; 
-    this->kd = kd, 
-    this->minOutput = minOutput, 
-    this->maxOutput = maxOutput, 
-    this->integral = 0;
-    this->prevError = 0;
+    // Derivativo (filtro de paso bajo)
+    differentiator = -(2.0f * Kd * (measurement - prevMeasurement) +
+                       (2.0f * tau - sampleTime) * differentiator) /
+                     (2.0f * tau + sampleTime);
 
-    this->defined = true;
-}
+    out = proportional + integrator + differentiator;
 
-double PID::calculate(double setpoint, double measuredValue) 
-{
-    if (!this->defined) throw std::invalid_argument("Constantes PID no definidas.");
-
-    double error = setpoint - measuredValue;
-
-    double proportional = kp * error;
-
-    integral += error; 
-    double integralComponent = ki * integral;
-
-    double derivative = error - prevError; 
-    double derivativeComponent = kd * derivative;
+    if (out > limMax) {
+        out = limMax;
+    } else if (out < limMin) {
+        out = limMin;
+    }
 
     prevError = error;
+    prevMeasurement = measurement;
 
-    double output = proportional + integralComponent + derivativeComponent;
+    return out;
+}
 
-    if (output > maxOutput) output = maxOutput;
-    else if (output < maxOutput) output = minOutput;
-    
-    return output;
+void PID::setGains(double kp, double ki, double kd) 
+{
+    this->gainsDefined = true;
+    this->Kp = kp;
+    this->Ki = ki;
+    this->Kd = kd;
+}
+
+void PID::setParameters(double tau, double limMin, double limMax, double limMinInt, double limMaxInt) 
+{
+    this->paramsDefined = true;
+    this->tau = tau;
+    this->limMin = limMin;
+    this->limMax = limMax;
+    this->limMinInt = limMinInt;
+    this->limMaxInt = limMaxInt;
 }
