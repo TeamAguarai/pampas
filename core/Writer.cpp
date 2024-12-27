@@ -1,7 +1,8 @@
 #include "../include/Writer.h"
 #include <sstream>
 
-Writer::Writer(std::string filename, std::string header, std::string delim) : is_open(false), delimiter(delim) {
+Writer::Writer(std::string filename, std::string header, std::string delim) : is_open(false), delimiter(delim)
+{
     file.open(filename);
     if (file.is_open()) {
         is_open = true;
@@ -11,11 +12,13 @@ Writer::Writer(std::string filename, std::string header, std::string delim) : is
     }
 }
 
-Writer::~Writer() {
+Writer::~Writer() 
+{
     if (is_open) file.close();
 }
 
-void Writer::write_row(const std::vector<std::string>& data) {
+void Writer::write_row(const std::vector<std::string>& data) 
+{
     if (!is_open) {
         std::cerr << "Error: El archivo no está abierto.\n";
         return;
@@ -30,7 +33,8 @@ void Writer::write_row(const std::vector<std::string>& data) {
     file << oss.str() << "\n";
 }
 
-void Writer::close() {
+void Writer::close() 
+{
     if (is_open) {
         file.close();
         is_open = false;

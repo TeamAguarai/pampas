@@ -1,5 +1,4 @@
 #include "PulseWidth.h"
-#include <stdexcept>
 
 void PulseWidth::define(double min, double steady, double max) 
 { 

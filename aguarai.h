@@ -3,3 +3,5 @@
 #include "include/PulseWidth.h"
 #include "include/Velocimeter.h"
 #include "include/Writer.h"
+#include "include/PID.h"
+#include "include/Drive.h"

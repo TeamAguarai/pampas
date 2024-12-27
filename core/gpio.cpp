@@ -55,4 +55,19 @@ namespace gpio {
         ::wiringPiISR(pin, edgeType, function);
     }
 
+    void stopOnInterrupt(int pin) {
+        ::wiringPiISRStop(pin); 
+    }
+
+    void reset() // pines pwm a estado estacionario
+    {
+        // pines pwm a estado estacionario
+        ::pinMode(13, 2);
+        ::pwmWrite(13, 1.5);
+
+        ::pinMode(18, 2);
+        ::pwmWrite(18, 1.5);
+        
+    }
+
 }

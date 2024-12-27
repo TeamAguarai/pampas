@@ -7,15 +7,12 @@
 
 class Conversion {
 private:
-    std::function<double(double)> transferFuncDouble;
-    std::function<int(int)> transferFuncInt; 
-
+    std::function<double(double)> transferFunc;
+    bool defined = false;
 public:
-    Conversion(std::function<double(double)> func);
-    Conversion(std::function<int(int)> func);
-
+    bool isDefined();
+    void define(std::function<double(double)> func);
     double convert(double input);
-    int convert(int input);
 };
 
 #endif

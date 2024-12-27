@@ -1,16 +1,20 @@
 #ifndef MOTOR_H
 #define MOTOR_H
+
+#include <csignal>
 #include "PulseWidth.h"
 
 class Motor
 {
+private:
 public:
+    Motor();
     PulseWidth pulseWidth;
-    int pin;
-    double speed;
+    int pin = -1;
     void definePin(int pin);
     void definePulseWidthRange(double min, double steady, double max);
     void setPulseWidth(double pulseWidth);
-    void runForMilliseconds(int milliseconds, double speed);
+    void cleanup(); // llamar si o si a este metodo al final del programa, en caso de un programa abortada ejecutara automaticamente.
+    // void runForMilliseconds(int milliseconds, double speed); ! revisar posible implementacion
 };
 #endif
