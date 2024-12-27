@@ -1,3 +1,4 @@
 makefile
 .tmp.driveupload
+.tmp.drivedownload
 .vscode
