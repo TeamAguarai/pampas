@@ -3,7 +3,7 @@ sudo apt-get update
 sudo apt-get upgrade
 
 
-# install wiringPi
+# instalar wiringPi
 mkdir -p ~/aguarai-dependences
 cd ~/libraries
 sudo apt-get purge wiringpi
