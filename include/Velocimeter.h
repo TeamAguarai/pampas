@@ -24,6 +24,7 @@ private:
 public:
     Velocimeter();
     ~Velocimeter();
+    double getUpdateTimeInterval();
     void waitForUpdate(double timeoutSeconds = 6.0);
     void definePin(int pin);
     void defineWheelDiameter(double wheelDiameter);
