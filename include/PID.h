@@ -12,11 +12,11 @@ private:
     double Kd;     
     double tau;    
 
-    double limMin;
-    double limMax;
+    double minOutput;
+    double maxOutput;
 
-    double limMinInt;
-    double limMaxInt;
+    double minOutputInt;
+    double maxOutputInt;
 
     double sampleTime;
 
@@ -34,7 +34,7 @@ public:
 
     PID();
     void setGains(double kp, double ki, double kd);
-    void setParameters(double tau, double limMin, double limMax, double limMinInt, double limMaxInt);
+    void setParameters(double tau, double minOutput, double maxOutput, double minOutputInt, double maxOutputInt);
     double calculate(double setpoint, double measurement, double sampleTime);
 };
 

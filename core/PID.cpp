@@ -21,10 +21,10 @@ double PID::calculate(double setpoint, double measurement, double sampleTime)
     double proportional = Kp * error;
     integrator += 0.5f * Ki * sampleTime * (error + prevError);
 
-    if (integrator > limMaxInt) {
-        integrator = limMaxInt;
-    } else if (integrator < limMinInt) {
-        integrator = limMinInt;
+    if (integrator > maxOutputInt) {
+        integrator = maxOutputInt;
+    } else if (integrator < minOutputInt) {
+        integrator = minOutputInt;
     }
 
     // Derivativo (filtro de paso bajo)
@@ -34,10 +34,10 @@ double PID::calculate(double setpoint, double measurement, double sampleTime)
 
     out = proportional + integrator + differentiator;
 
-    if (out > limMax) {
-        out = limMax;
-    } else if (out < limMin) {
-        out = limMin;
+    if (out > maxOutput) {
+        out = maxOutput;
+    } else if (out < minOutput) {
+        out = minOutput;
     }
 
     prevError = error;
@@ -54,12 +54,12 @@ void PID::setGains(double kp, double ki, double kd)
     this->Kd = kd;
 }
 
-void PID::setParameters(double tau, double limMin, double limMax, double limMinInt, double limMaxInt) 
+void PID::setParameters(double tau, double minOutput, double maxOutput, double minOutputInt, double maxOutputInt) 
 {
     this->paramsDefined = true;
     this->tau = tau;
-    this->limMin = limMin;
-    this->limMax = limMax;
-    this->limMinInt = limMinInt;
-    this->limMaxInt = limMaxInt;
+    this->minOutput = minOutput;
+    this->maxOutput = maxOutput;
+    this->minOutputInt = minOutputInt;
+    this->maxOutputInt = maxOutputInt;
 }
