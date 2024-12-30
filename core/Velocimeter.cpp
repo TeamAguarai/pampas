@@ -9,7 +9,7 @@ Velocimeter::Velocimeter()
     gpio::setupGpioPinout();
     velocimeterInstance = this;
 
-    // prepara el cleanup en caso de un programa abortado
+    // prepara el cleanup en caso de un programa abortado !! REVISAR
     std::signal(SIGINT, [](int) {
         velocimeterInstance->cleanup();
     });    
@@ -94,6 +94,7 @@ void Velocimeter::waitForUpdate(double timeoutSeconds)
     while (!this->udpated && timeDifference <= timeoutSeconds) {
         end = std::chrono::steady_clock::now();
         timeDifference = std::chrono::duration_cast<std::chrono::seconds>(end - begin).count();
+        gpio::delay(10); // para evitar sobrecarga
     }
 
     if (timeDifference >= timeoutSeconds) this->speed = 0; // cuando se cumple el timeout, la velocidad se supone que es nula

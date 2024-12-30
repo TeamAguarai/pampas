@@ -14,12 +14,12 @@ private:
     double timeInterval;
     struct timespec startTime, endTime;
     static void pulseHandlerWrapper();
-    bool started = false;
     std::function<void(double speed)> updateCallback; // funcion que se llama cuando el velocimetro detecta un pulso
     bool distance = 0.0;
     int pin;
     double speed = 0;
     double wheelDiameter;
+    bool started = false;
     bool udpated = false;
 public:
     Velocimeter();
@@ -33,7 +33,7 @@ public:
     double getSpeed();
     double getDistance();
     void resetDistance();
-    void cleanup(); // llamar si o si a este metodo al final del programa, en caso de un programa abortada ejecutara automaticamente.
+    void cleanup(); // llamar si o si a este metodo al final del programa, en caso de un programa abortado ejecutara automaticamente.
 };
 
 #endif
