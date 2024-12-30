@@ -1,10 +1,13 @@
 #include "Drive.h"
 
+namespace control {
+
 Drive* driveInstance = nullptr;
+
 
 Drive::Drive()
 {
-    gpio::setupGpioPinout();
+    control::gpio::setupGpioPinout();
 }
 
 void Drive::definePid(double kp, double ki, double kd, double tau, double minOutput, double maxOutput, double minOutputInt, double maxOutputInt) 
@@ -66,5 +69,7 @@ void Drive::run(double speed)
     
     this->control = std::thread(&Drive::controlledSpeed, this, speed);
     
+
+}
 
 }

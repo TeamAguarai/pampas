@@ -1,5 +1,7 @@
 #include "Conversion.h"
 
+namespace control {
+
 bool Conversion::isDefined() 
 {
     return this->defined;
@@ -16,4 +18,6 @@ double Conversion::convert(double input)
 {
     if (!this->defined) throw std::runtime_error("Función de conversión no definida.");
     return this->transferFunc(input);
+}
+
 }

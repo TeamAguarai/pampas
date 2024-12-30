@@ -5,6 +5,9 @@
 
 #include <stdexcept>
 
+namespace control {    
+
+
 class PID {
 private:
     double Kp;     
@@ -37,5 +40,7 @@ public:
     void setParameters(double tau, double minOutput, double maxOutput, double minOutputInt, double maxOutputInt);
     double calculate(double setpoint, double measurement, double sampleTime);
 };
+
+}
 
 #endif 

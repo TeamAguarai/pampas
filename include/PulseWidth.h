@@ -1,6 +1,8 @@
 #ifndef PULSEWIDTH_H
 #define PULSEWIDTH_H
 
+namespace control {
+    
 class PulseWidth
 {
 public:
@@ -11,4 +13,6 @@ public:
     bool isDefined();
     double validate(double pulseWidthMs);
 };
+
+}
 #endif

@@ -1,6 +1,8 @@
 #ifndef GPIO_H
 #define GPIO_H
 
+namespace control {
+    
 namespace gpio {
     void setupGpioPinout();
     void pwmWrite(int pin, double pulseWidthMs);
@@ -23,6 +25,8 @@ namespace gpio {
     const int GPIO_CLOCK = 3;
     const int PWM_MODE_MS = 0;
     const int INT_EDGE_RISING = 2;
+
+}
 
 }
 

@@ -1,6 +1,7 @@
 #include "Velocimeter.h"
 #include "gpio.h"
-#include "Writer.h"
+
+namespace control {
 
 Velocimeter* velocimeterInstance = nullptr;
 
@@ -98,4 +99,6 @@ void Velocimeter::waitForUpdate(double timeoutSeconds)
     }
 
     if (timeDifference >= timeoutSeconds) this->speed = 0; // cuando se cumple el timeout, la velocidad se supone que es nula
+}
+
 }

@@ -1,5 +1,7 @@
 #include "PulseWidth.h"
 
+namespace control {
+    
 void PulseWidth::define(double min, double steady, double max) 
 { 
     this->min = min; 
@@ -18,4 +20,6 @@ double PulseWidth::validate(double pulseWidth)
     if (pulseWidth > this->max) return this->max;
     if (pulseWidth < this->min) return this->min;
     return pulseWidth;
+}
+
 }

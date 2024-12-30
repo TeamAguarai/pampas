@@ -4,6 +4,8 @@
 #include <csignal>
 #include "PulseWidth.h"
 
+namespace control {
+    
 class Motor
 {
 private:
@@ -18,4 +20,6 @@ public:
     void cleanup(); // llamar si o si a este metodo al final del programa, en caso de un programa abortada ejecutara automaticamente.
     // void runForMilliseconds(int milliseconds, double speed); ! revisar posible implementacion
 };
+}
+
 #endif

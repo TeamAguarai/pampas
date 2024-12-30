@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <string>
 
+namespace control {
+
 class Conversion {
 private:
     std::function<double(double)> transferFunc;
@@ -14,5 +16,7 @@ public:
     void define(std::function<double(double)> func);
     double convert(double input);
 };
+
+}
 
 #endif

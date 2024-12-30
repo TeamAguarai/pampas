@@ -1,10 +1,14 @@
-#ifndef WRTER_H
-#define WRTER_H
+#ifndef WRITER_H
+#define WRITER_H
 
 #include <fstream>
 #include <string>
 #include <iostream>
 #include <vector>
+#include <sstream>
+
+
+namespace control { 
 
 class Writer {
 private:
@@ -17,5 +21,7 @@ public:
     void write_row(const std::vector<std::string>& data);
     void close();
 };
+
+}
 
 #endif

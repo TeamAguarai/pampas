@@ -1,6 +1,7 @@
-#include "../include/Writer.h"
-#include <sstream>
+#include "Writer.h"
 
+namespace control {
+    
 Writer::Writer(std::string filename, std::string header, std::string delim) : is_open(false), delimiter(delim)
 {
     file.open(filename);
@@ -39,4 +40,6 @@ void Writer::close()
         file.close();
         is_open = false;
     }
+}
+
 }

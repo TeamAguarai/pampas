@@ -3,6 +3,7 @@
 #include "gpio.h"
 #include <wiringPi.h> 
 
+namespace control {
 
 namespace gpio {
 
@@ -69,5 +70,7 @@ namespace gpio {
         ::pwmWrite(18, 1.5);
         
     }
+
+}
 
 }

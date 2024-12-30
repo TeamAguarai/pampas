@@ -5,6 +5,8 @@
 #include "Motor.h"
 #include "gpio.h"
 
+namespace control {
+    
 Motor* motorInstance = nullptr;
 
 Motor::Motor() {
@@ -51,3 +53,5 @@ void Motor::runForMilliseconds(int milliseconds, double pulseWidthMs) {
 }
 */
 
+
+}

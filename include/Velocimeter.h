@@ -2,10 +2,12 @@
 #define VELOCIMETER_H
 
 #include <time.h>
-#include <iostream>
 #include <functional>
 #include <csignal>
 #include <chrono>
+#include <stdexcept>
+
+namespace control {   
 
 class Velocimeter
 {
@@ -14,7 +16,6 @@ private:
     double timeInterval;
     struct timespec startTime, endTime;
     static void pulseHandlerWrapper();
-    std::function<void(double speed)> updateCallback; // funcion que se llama cuando el velocimetro detecta un pulso
     bool distance = 0.0;
     int pin;
     double speed = 0;
@@ -35,5 +36,7 @@ public:
     void resetDistance();
     void cleanup(); // llamar si o si a este metodo al final del programa, en caso de un programa abortado ejecutara automaticamente.
 };
+
+}
 
 #endif

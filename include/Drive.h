@@ -10,17 +10,20 @@
 #include <omp.h>
 #include <functional>
 
+namespace control {
+
+
 class Drive {
 private:
     std::thread control;
-    PID pid; // el metodo pid.define debe de llamarse antes de mover al motor
+    control::PID pid; // el metodo pid.define debe de llamarse antes de mover al motor
     bool running = false;
     double runningSpeed = 0;
     void controlledSpeed(double speed);
 public:
-    Conversion MsToPulseWidth; // el metodo pulseWidthToMs.define debe de llamarse antes de mover al motor
-    Motor motor;
-    Velocimeter velocimeter;
+    control::Conversion MsToPulseWidth; // el metodo pulseWidthToMs.define debe de llamarse antes de mover al motor
+    control::Motor motor;
+    control::Velocimeter velocimeter;
     Drive();
     void run(double speed);
     void stop();
@@ -31,5 +34,7 @@ public:
     void defineMotor(int pin, double pulseWidthMin, double pulseWidthSteady, double pulseWidthMax);
     void defineVelocimeter(int pin, double wheelDiameter);
 };
+
+}
 
 #endif

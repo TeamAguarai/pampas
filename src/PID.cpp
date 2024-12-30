@@ -2,6 +2,7 @@
 
 #include "PID.h"
 
+namespace control {
 
 PID::PID() 
 {
@@ -62,4 +63,6 @@ void PID::setParameters(double tau, double minOutput, double maxOutput, double m
     this->maxOutput = maxOutput;
     this->minOutputInt = minOutputInt;
     this->maxOutputInt = maxOutputInt;
+}
+
 }
