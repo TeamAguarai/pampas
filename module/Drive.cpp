@@ -1,21 +1,59 @@
 #include "Drive.h"
 
+Drive* driveInstance = nullptr;
+
 Drive::Drive()
 {
     gpio::setupGpioPinout();
 }
 
-void Drive::definePid(double kp, double ki, double kd, double minOutput, double maxOutput) {
-    this->pid.define(kp, ki, kd, minOutput, maxOutput);
+void Drive::definePid(double kp, double ki, double kd, double tau, double minOutput, double maxOutput, double minOutputInt, double maxOutputInt) 
+{
+    this->pid.setGains(kp, ki, kd);
+    this->pid.setParameters(tau, minOutput, maxOutput, minOutputInt, maxOutputInt);
 }
 
-void Drive::defineTransferFunction(std::function<double(double)> func) {
+void Drive::defineVelocimeter(int pin, double wheelDiameterCM) 
+{
+    this->velocimeter.definePin(pin);
+    this->velocimeter.defineWheelDiameter(wheelDiameterCM);
+}
+
+
+void Drive::defineMotor(int pin, double pulseWidthMin, double pulseWidthSteady, double pulseWidthMax) 
+{
+    this->motor.definePin(pin);
+    this->motor.definePulseWidthRange(pulseWidthMin, pulseWidthSteady, pulseWidthMax);
+}
+
+void Drive::defineTransferFunction(std::function<double(double)> func) 
+{
     this->MsToPulseWidth.define(func);
 }
 
 void Drive::stop() {
     this->running = false;
-    this->control.join();
+    if (this->control.joinable()) this->control.join();
+}
+
+
+
+void Drive::controlledSpeed(double speed) 
+{
+    while (this->running) {
+
+        this->velocimeter.start();
+        this->velocimeter.waitForUpdate();
+
+        // Calcular velocidad utilizando PID
+        double movementSpeed = this->pid.calculate(
+            speed, 
+            this->velocimeter.getSpeed(), 
+            this->velocimeter.getUpdateTimeInterval()
+        );
+
+        this->motor.setPulseWidth(this->MsToPulseWidth.convert(movementSpeed));
+    }
 }
 
 void Drive::run(double speed) 
@@ -26,13 +64,7 @@ void Drive::run(double speed)
     this->runningSpeed = speed;
     this->running = true;
     
-    this->control = std::thread(this, [=]() {
-        while (this->running) {
-            this->velocimeter.start();
-            this->velocimeter.waitForUpdate();
-            double movementSpeed = this->pid.calculate(speed, velocimeter.getSpeed());
-            std::cout << movementSpeed;
-            // this->motor.setPulseWidth(this->MsToPulseWidth.convert(movementSpeed));
-        }
-    });
+    this->control = std::thread(&Drive::controlledSpeed, this, speed);
+    
+
 }
