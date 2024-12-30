@@ -44,7 +44,26 @@ while (running)
 }
 ```
 
+## 🎮 Uso simple
+Clona este repositorio en tu proyecto personal
+```bash
+git clone https://github.com/TeamAguarai/Control.git
+```
+
+Incluye la cabezera única en tu codigo
+```c
+#include "Control/control.h"
+```
+
+Compila los archivos .cpp incluyendo los de este repositorio con WiringPi
+```bash
+g++ -std=c++11 -I/control/include $(TU_ARCHIVO).cpp /control/src/*.cpp -o $(TU_ARCHIVO) -lwiringPi
+```
+
+
+
+
 ## 👨‍🔬Funcionamiento
-... ejemplos con imágenes y código de la estructura y funcionamiento del proyecto ...
+> ejemplos con imágenes y código de la estructura y funcionamiento del proyecto ...
 ## ⭐ API
-... descripción detallada de las clases y métodos ...
+> descripción detallada de las clases y métodos 
