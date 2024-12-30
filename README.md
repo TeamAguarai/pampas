@@ -21,7 +21,7 @@ cd WiringPi
 
 Utiliza un controlador PID para gestionar el movimiento del motor
 ```c
-Drive drive;
+control::Drive drive;
 drive.definePid(0.4369, 0.6735, 0, 0, 0, 7.4, -10, 10);
 drive.defineTransferFunction(polinomialRegression);
 drive.defineMotor(13, 1.57, 1.57, 2.0);
@@ -31,7 +31,7 @@ drive.run(2.5);
 
 Realiza mediciones de velocidad a traves de sensores de pulso (Efecto Hall, Infrarojo, etc.)
 ```c
-Velocimeter velocimeter;
+control::Velocimeter velocimeter;
 velocimeter.definePin(17);
 velocimeter.defineWheelDiameter(0.105);
 
@@ -54,6 +54,7 @@ Incluye la cabezera única en tu codigo
 ```c
 #include "Control/control.h"
 ```
+> Todo el código fuente está bajo el namespace control
 
 Compila los archivos .cpp incluyendo los de este repositorio con WiringPi
 ```bash
