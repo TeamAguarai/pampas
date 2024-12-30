@@ -6,10 +6,10 @@ namespace control {
 class LowPass {
 private:
     double alpha;       // Coeficiente de suavizado
-    double prevOutput;  // Última salida (x_{n-1})
+    double prevOutput = 0.0;  // Última salida (x_{n-1})
 
 public:
-    LowPass(double alpha);
+    void defineAlpha(double value);
     double filter(double input);
 };
 
