@@ -7,7 +7,9 @@ bool Conversion::isDefined()
 
 void Conversion::define(std::function<double(double)> func) 
 {
+    this->defined = true;
     this->transferFunc = func;
+    
 }
 
 double Conversion::convert(double input) 
