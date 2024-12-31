@@ -1,10 +1,10 @@
 #include <iostream>
-#include "../aguarai.h"
+#include "../control.h"
 
 int main() {
-    gpio::setupGpioPinout();
+    control::gpio::setupGpioPinout();
 
-    Motor motor;
+    control::Motor motor;
     motor.definePin(13);
     motor.pulseWidth.define(1.5, 1.5, 2.0);
 

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "aguarai.h"
+#include "../control.h"
 
 int main(int argc, char* argv[]) {
 
@@ -8,14 +8,14 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    gpio::setupGpioPinout();
+    control::gpio::setupGpioPinout();
 
     int pin = std::atoi(argv[1]);
     
     long int counter = 0;
     while (true) {
-        std::cout << "\rRegistro [" << counter << "] -> valor Pin(" << pin << "): " << gpio::digitalRead(pin) << std::endl;
-        gpio::delay(100);
+        std::cout << "\rRegistro [" << counter << "] -> valor Pin(" << pin << "): " << control::gpio::digitalRead(pin) << std::endl;
+        control::gpio::delay(100);
         counter++;
     }
 

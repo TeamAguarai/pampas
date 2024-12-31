@@ -2,7 +2,9 @@
 #include <typeinfo>
 #include <string>
 #include <thread>
-#include "../aguarai.h"
+#include "../control.h"
+
+using namespace control;
 
 int main() {
 
@@ -34,6 +36,7 @@ int main() {
         {
             velocimeter.start();
             velocimeter.waitForUpdate();
+            
             row[0] = std::to_string(i);
             row[1] = std::to_string(velocimeter.getSpeed());
             writer.write_row(row);
