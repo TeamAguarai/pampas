@@ -14,6 +14,7 @@ En cualquier carpeta de tu sistema, clona este repositorio y ejecuta el archivo 
 ```bash
 git clone https://github.com/TeamAguarai/Control
 cd Control
+chmod +x ./build
 sudo ./build
 ```
 
@@ -31,7 +32,6 @@ Por último, clona este repositorio e instala control.h ejecutando el makefile
 ```bash
 git clone https://github.com/TeamAguarai/Control
 cd Control
-chmod +x ./build
 sudo make
 ```
 
