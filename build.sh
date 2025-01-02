@@ -14,4 +14,6 @@ fi
 
 make
 
+echo ""
 echo "Asegurate de incluir las banderas -lcontrol y -lwiringPi al compilar tus proyectos"
+echo "Puedes eliminar esta carpeta con seguridad."
