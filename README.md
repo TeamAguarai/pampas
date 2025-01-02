@@ -14,8 +14,8 @@ En cualquier carpeta de tu sistema, clona este repositorio y ejecuta el archivo 
 ```bash
 git clone https://github.com/TeamAguarai/Control
 cd Control
-chmod +x ./build
-sudo ./build
+chmod +x ./build.sh
+sudo ./build.sh
 ```
 
 ### 🤓 Método Hazlo tu mismo
