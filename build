@@ -1,3 +1,5 @@
+#!/bin/sh -e
+
 if command -v gpio &> /dev/null
 then
     echo "WiringPi está instalado. (Omitiendo su instalacion)"
