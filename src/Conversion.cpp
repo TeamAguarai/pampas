@@ -1,4 +1,9 @@
-#include "Conversion.h"
+#ifdef DEV
+    #include "Conversion.h"
+#else
+    #include "control.h"
+#endif
+
 
 namespace control {
 
@@ -21,3 +26,4 @@ double Conversion::convert(double input)
 }
 
 }
+

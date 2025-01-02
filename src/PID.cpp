@@ -1,6 +1,10 @@
 /* Creditos: https://github.com/pms67/PID/blob/master/PID.cpp */
 
-#include "PID.h"
+#ifdef DEV
+    #include "PID.h"
+#else
+    #include "control.h"
+#endif
 
 namespace control {
 

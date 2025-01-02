@@ -1,7 +1,13 @@
 #define PWM_FREQUENCY 76.92
 
-#include "gpio.h"
 #include <wiringPi.h> 
+
+#ifdef DEV
+    #include "gpio.h"
+#else
+    #include "control.h"
+#endif
+
 
 namespace control {
 

@@ -1,13 +1,18 @@
 #ifndef DRIVE_H
 #define DRIVE_H
 
-#include "Motor.h"
-#include "Velocimeter.h"
-#include "PID.h"
-#include "Conversion.h"
-#include "gpio.h"
+#ifdef DEV
+    #include "Motor.h"
+    #include "Velocimeter.h"
+    #include "PID.h"
+    #include "Conversion.h"
+    #include "gpio.h"
+#else
+    #include "control.h"
+#endif
+
+
 #include <thread>
-#include <omp.h>
 #include <functional>
 
 namespace control {
@@ -32,7 +37,7 @@ public:
     void definePid(double kp, double ki, double kd, double tau, double minOutput, double maxOutput, double minOutputInt, double maxOutputInt);
     void defineTransferFunction(std::function<double(double)> func);
     void defineMotor(int pin, double pulseWidthMin, double pulseWidthSteady, double pulseWidthMax);
-    void defineVelocimeter(int pin, double wheelDiameter);
+    void defineVelocimeter(int pin, double wheelDiameter, double alpha);
 };
 
 }

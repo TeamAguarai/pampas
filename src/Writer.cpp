@@ -1,4 +1,9 @@
-#include "Writer.h"
+#ifdef DEV
+    #include "Writer.h"
+#else
+    #include "control.h"
+#endif
+
 
 namespace control {
     

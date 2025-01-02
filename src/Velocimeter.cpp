@@ -1,5 +1,10 @@
-#include "Velocimeter.h"
-#include "gpio.h"
+#ifdef DEV
+    #include "Velocimeter.h"
+    #include "gpio.h"
+#else
+    #include "control.h"
+#endif
+
 
 namespace control {
 
@@ -37,6 +42,11 @@ void Velocimeter::defineWheelDiameter(double wheelDiameter)
     this->wheelCircumference = 2 * (wheelDiameter/2) * 3.1416;
 }
 
+void Velocimeter::defineAlpha(double value)
+{
+    this->filter.defineAlpha(value);
+}
+
 void Velocimeter::pulseHandlerWrapper() 
 {
     velocimeterInstance->pulseHandler();
@@ -60,8 +70,8 @@ void Velocimeter::start()
     this->udpated = false;
     if (this->started == true) return;
 
-    gpio::pinMode(this->pin, gpio::INPUT);
-    gpio::onInterrupt(this->pin, gpio::INT_EDGE_RISING, &pulseHandlerWrapper);
+    gpio::pinMode(this->pin, INPUT);
+    gpio::onInterrupt(this->pin, INT_EDGE_RISING, &pulseHandlerWrapper);
     clock_gettime(CLOCK_MONOTONIC, &this->startTime);
     
     this->started = true;
@@ -74,7 +84,8 @@ double Velocimeter::getUpdateTimeInterval()
 
 double Velocimeter::getSpeed() 
 {
-    return this->speed;
+    // return this->speed;
+    return this->filter.filter(this->speed); // valor filtrado
 }
 
 double Velocimeter::getDistance() 

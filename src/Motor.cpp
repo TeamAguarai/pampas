@@ -1,9 +1,15 @@
 #include <stdexcept>
 #include <thread>
 #include <chrono>
-#include "PulseWidth.h"
-#include "Motor.h"
-#include "gpio.h"
+
+#ifdef DEV
+    #include "PulseWidth.h"
+    #include "Motor.h"
+    #include "gpio.h"
+#else
+    #include "control.h"
+#endif
+
 
 namespace control {
     
@@ -29,7 +35,7 @@ void Motor::cleanup()
 void Motor::definePin(int pin) 
 {
     this->pin = pin;
-    gpio::pinMode(pin, gpio::PWM_OUTPUT);
+    gpio::pinMode(pin, PWM_OUTPUT);
 }
 
 void Motor::definePulseWidthRange(double min, double steady, double max) {

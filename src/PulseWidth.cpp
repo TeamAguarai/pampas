@@ -1,4 +1,8 @@
-#include "PulseWidth.h"
+#ifdef DEV
+    #include "PulseWidth.h"
+#else
+    #include "control.h"
+#endif
 
 namespace control {
     

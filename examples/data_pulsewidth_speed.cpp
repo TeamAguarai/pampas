@@ -19,6 +19,7 @@ int main() {
     Velocimeter velocimeter;
     velocimeter.definePin(17);
     velocimeter.defineWheelDiameter(0.105);
+    velocimeter.defineAlpha(0.9);
 
     Writer writer("anchoDePulso_Velocidad.csv", "ancho de pulso (ms), velocidad (m/s)");
     std::vector<std::string> row = {"",""};

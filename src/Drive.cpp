@@ -1,4 +1,8 @@
-#include "Drive.h"
+#ifdef DEV
+    #include "Drive.h"
+#else
+    #include "control.h"
+#endif
 
 namespace control {
 
@@ -16,10 +20,11 @@ void Drive::definePid(double kp, double ki, double kd, double tau, double minOut
     this->pid.setParameters(tau, minOutput, maxOutput, minOutputInt, maxOutputInt);
 }
 
-void Drive::defineVelocimeter(int pin, double wheelDiameterCM) 
+void Drive::defineVelocimeter(int pin, double wheelDiameterCM, double alpha) 
 {
     this->velocimeter.definePin(pin);
     this->velocimeter.defineWheelDiameter(wheelDiameterCM);
+    this->velocimeter.defineAlpha(alpha);
 }
 
 
