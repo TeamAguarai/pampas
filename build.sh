@@ -13,3 +13,5 @@ else
 fi
 
 make
+
+echo "Asegurate de incluir las banderas -lcontrol y -lwiringPi al compilar tus proyectos"
