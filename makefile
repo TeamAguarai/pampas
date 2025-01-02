@@ -11,7 +11,6 @@ OBJ = build/control.o
 default: build combine compile install
 
 combine:
-	mkdir -p build
 	for file in $(HDR); do cat $$file; echo ""; done > $(COMBINED_HDR)
 	for file in $(SRC); do cat $$file; echo ""; done > $(COMBINED_SRC)
 
