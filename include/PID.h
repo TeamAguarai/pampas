@@ -1,5 +1,3 @@
-/* Creditos: https://github.com/pms67/PID/blob/master/PID.h */
-
 #if defined(CONTROL_DEV) && defined(CONTROL_LIBRARY)
     #error "No se puede definir CONTROL_DEV y CONTROL_LIBRARY al mismo tiempo."
 #endif
@@ -12,6 +10,7 @@
     #include "control.h"
 #endif
 
+/* Creditos: https://github.com/pms67/PID/blob/master/PID.h */
 
 #include <stdexcept>
 

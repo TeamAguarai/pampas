@@ -1,8 +1,3 @@
-#ifndef MOTOR_H
-#define MOTOR_H
-
-#include <csignal>
-
 #if defined(CONTROL_DEV) && defined(CONTROL_LIBRARY)
     #error "No se puede definir CONTROL_DEV y CONTROL_LIBRARY al mismo tiempo."
 #endif
@@ -16,6 +11,7 @@
     #include "control.h"
 #endif
 
+#include <csignal>
 
 namespace control {
     
