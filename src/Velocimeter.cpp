@@ -1,10 +1,14 @@
-#ifdef DEV
-    #include "Velocimeter.h"
-    #include "gpio.h"
-#else
-    #include "control.h"
+#if defined(CONTROL_DEV) && defined(CONTROL_LIBRARY)
+    #error "No se puede definir CONTROL_DEV y CONTROL_LIBRARY al mismo tiempo."
 #endif
 
+#ifdef CONTROL_DEV
+    #include "Velocimeter.h"
+#endif
+
+#ifdef CONTROL_LIBRARY
+    #include "control.h"
+#endif
 
 namespace control {
 
@@ -12,7 +16,7 @@ Velocimeter* velocimeterInstance = nullptr;
 
 Velocimeter::Velocimeter() 
 {
-    gpio::setupGpioPinout();
+    control::gpio::setupGpioPinout();
     velocimeterInstance = this;
 
     // prepara el cleanup en caso de un programa abortado !! REVISAR

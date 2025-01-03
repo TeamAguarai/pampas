@@ -1,5 +1,5 @@
 /*
-* _basic: funcionalidad para desarrollo interno
+* _dev: funcionalidad para desarrollo interno
 */
 
 #ifdef DEV

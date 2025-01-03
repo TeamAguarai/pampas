@@ -1,12 +1,19 @@
-#define PWM_FREQUENCY 76.92
+#if defined(CONTROL_DEV) && defined(CONTROL_LIBRARY)
+    #error "No se puede definir CONTROL_DEV y CONTROL_LIBRARY al mismo tiempo."
+#endif
 
-#include <wiringPi.h> 
-
-#ifdef DEV
+#ifdef CONTROL_DEV
     #include "gpio.h"
-#else
+#endif
+
+#ifdef CONTROL_LIBRARY
     #include "control.h"
 #endif
+
+
+#define PWM_FREQUENCY 76.92
+#include <wiringPi.h> 
+
 
 
 namespace control {

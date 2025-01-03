@@ -1,8 +1,15 @@
-#ifdef DEV
+#if defined(CONTROL_DEV) && defined(CONTROL_LIBRARY)
+    #error "No se puede definir CONTROL_DEV y CONTROL_LIBRARY al mismo tiempo."
+#endif
+
+#ifdef CONTROL_DEV
     #include "Conversion.h"
-#else
+#endif
+
+#ifdef CONTROL_LIBRARY
     #include "control.h"
 #endif
+
 
 
 namespace control {

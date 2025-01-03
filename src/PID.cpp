@@ -1,8 +1,14 @@
 /* Creditos: https://github.com/pms67/PID/blob/master/PID.cpp */
 
-#ifdef DEV
+#if defined(CONTROL_DEV) && defined(CONTROL_LIBRARY)
+    #error "No se puede definir CONTROL_DEV y CONTROL_LIBRARY al mismo tiempo."
+#endif
+
+#ifdef CONTROL_DEV
     #include "PID.h"
-#else
+#endif
+
+#ifdef CONTROL_LIBRARY
     #include "control.h"
 #endif
 
