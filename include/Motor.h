@@ -34,5 +34,3 @@ public:
     // void runForMilliseconds(int milliseconds, double speed); ! revisar posible implementacion
 };
 }
-
-#endif
