@@ -25,6 +25,8 @@ namespace gpio {
     void stopOnInterrupt(int pin);
     void reset();
 
+    /* 
+    (depreceated) Se usaran en cambio las definiciones de WiringPi
     const int INPUT = 0;   
     const int OUTPUT = 1; 
     const int HIGH = 1;     
@@ -36,6 +38,7 @@ namespace gpio {
     const int GPIO_CLOCK = 3;
     const int PWM_MODE_MS = 0;
     const int INT_EDGE_RISING = 2;
+    */
 
 }
 

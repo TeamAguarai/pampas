@@ -1,6 +1,3 @@
-#ifndef VELOCIMETER_H
-#define VELOCIMETER_H
-
 #include <time.h>
 #include <functional>
 #include <csignal>
