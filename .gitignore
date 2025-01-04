@@ -1,3 +1,5 @@
 .tmp.driveupload
 .tmp.drivedownload
 .vscode
+# para vscode extension de cpp
+wiringPi.h 
