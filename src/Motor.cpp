@@ -45,7 +45,7 @@ void Motor::definePin(int pin)
 }
 
 void Motor::definePulseWidthRange(double min, double steady, double max) {
-    this->pulseWidth.define(min, steady, max);
+    this->pulseWidth.set(min, steady, max);
 }
 
 void Motor::setPulseWidth(double pulseWidth) 

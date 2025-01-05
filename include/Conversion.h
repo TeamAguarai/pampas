@@ -24,7 +24,7 @@ private:
     bool defined = false;
 public:
     bool isDefined();
-    void define(std::function<double(double)> func);
+    void set(std::function<double(double)> func);
     double convert(double input);
 };
 

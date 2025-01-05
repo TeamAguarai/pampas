@@ -43,7 +43,7 @@ void Drive::defineMotor(int pin, double pulseWidthMin, double pulseWidthSteady, 
 
 void Drive::defineTransferFunction(std::function<double(double)> func) 
 {
-    this->MsToPulseWidth.define(func);
+    this->MsToPulseWidth.set(func);
 }
 
 void Drive::stop() {

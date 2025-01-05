@@ -19,7 +19,7 @@ bool Conversion::isDefined()
     return this->defined;
 }
 
-void Conversion::define(std::function<double(double)> func) 
+void Conversion::set(std::function<double(double)> func) 
 {
     this->defined = true;
     this->transferFunc = func;

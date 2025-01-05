@@ -11,7 +11,7 @@
 #endif
 namespace control {
     
-void PulseWidth::define(double min, double steady, double max) 
+void PulseWidth::set(double min, double steady, double max) 
 { 
     this->min = min; 
     this->max = max;

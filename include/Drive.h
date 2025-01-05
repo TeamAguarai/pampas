@@ -26,12 +26,12 @@ namespace control {
 class Drive {
 private:
     std::thread control;
-    control::PID pid; // el metodo pid.define debe de llamarse antes de mover al motor
+    control::PID pid; // el metodo pid.set debe de llamarse antes de mover al motor
     bool running = false;
     double runningSpeed = 0;
     void controlledSpeed(double speed);
 public:
-    control::Conversion MsToPulseWidth; // el metodo pulseWidthToMs.define debe de llamarse antes de mover al motor
+    control::Conversion MsToPulseWidth; // el metodo pulseWidthToMs.set debe de llamarse antes de mover al motor
     control::Motor motor;
     control::Velocimeter velocimeter;
     Drive();
