@@ -5,10 +5,10 @@
 #ifdef DEV
     #include "_dev.h"
 #else
-    #include "control.h"
+    #include "pampas.h"
 #endif
 
-namespace control {
+namespace pampas {
 
 void hello() 
 {

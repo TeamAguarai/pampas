@@ -27,7 +27,7 @@ int main() {
 
     std::cout << "PR: " << polinomialRegression(3) << std::endl;
 
-    control::Drive drive;
+    pampas::Drive drive;
     drive.setPid(0.4369, 0.6735, 0, 0, 0, 7.4, -10, 10);
     drive.setTransferFunction(polinomialRegression);
     drive.setMotor(13, 1.57, 1.57, 2.0);

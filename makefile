@@ -2,11 +2,11 @@ SRC = $(wildcard src/*.cpp)
 HDR = $(wildcard include/*.h)
 
 # Archivos combinados
-COMBINED_SRC = build/control.cpp
-COMBINED_HDR = build/control.h
+COMBINED_SRC = build/pampas.cpp
+COMBINED_HDR = build/pampas.h
 
 # Objetos
-OBJ = build/control.o
+OBJ = build/pampas.o
 
 default: build combine compile install
 
@@ -15,13 +15,13 @@ combine:
 	for file in $(SRC); do cat $$file; echo ""; done > $(COMBINED_SRC)
 
 compile:
-	g++ -fPIC -Ibuild -c $(COMBINED_SRC) -o $(OBJ) -Iinclude -lwiringPi -DCONTROL_DEV
-	g++ -shared -o build/libcontrol.so $(OBJ)
+	g++ -fPIC -Ibuild -c $(COMBINED_SRC) -o $(OBJ) -Iinclude -lwiringPi -DPAMPAS_DEV
+	g++ -shared -o build/libpampas.so $(OBJ)
 
 # si la libreria ya existe, se sobreescribe
 install:
-	mv -f build/libcontrol.so /usr/lib/ 
-	cp $(COMBINED_HDR) /usr/local/include/control.h
+	mv -f build/libpampas.so /usr/lib/ 
+	cp $(COMBINED_HDR) /usr/local/include/pampas.h
 
 build:
 	mkdir -p build

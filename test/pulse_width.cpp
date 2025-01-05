@@ -1,10 +1,10 @@
 #include <iostream>
-#include "../control.h"
+#include "../pampas.h"
 
 int main() {
-    control::gpio::setupGpioPinout();
+    pampas::gpio::setupGpioPinout();
 
-    control::Motor motor;
+    pampas::Motor motor;
     motor.setPin(13);
     motor.pulseWidth.set(1.5, 1.5, 2.0);
 

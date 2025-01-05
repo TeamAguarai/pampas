@@ -7,10 +7,10 @@
 #endif
 
 #ifdef CONTROL_LIBRARY
-    #include "control.h"
+    #include "pampas.h"
 #endif
 
-namespace control {
+namespace pampas {
     
 Writer::Writer(std::string filename, std::string header, std::string delim) : is_open(false), delimiter(delim)
 {

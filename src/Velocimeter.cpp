@@ -7,16 +7,16 @@
 #endif
 
 #ifdef CONTROL_LIBRARY
-    #include "control.h"
+    #include "pampas.h"
 #endif
 
-namespace control {
+namespace pampas {
 
 Velocimeter* velocimeterInstance = nullptr;
 
 Velocimeter::Velocimeter() 
 {
-    control::gpio::setupGpioPinout();
+    pampas::gpio::setupGpioPinout();
     velocimeterInstance = this;
 
     // prepara el cleanup en caso de un programa abortado !! REVISAR

@@ -7,18 +7,18 @@
 #endif
 
 #ifdef CONTROL_LIBRARY
-    #include "control.h"
+    #include "pampas.h"
 #endif
 
 
-namespace control {
+namespace pampas {
 
 Drive* driveInstance = nullptr;
 
 
 Drive::Drive()
 {
-    control::gpio::setupGpioPinout();
+    pampas::gpio::setupGpioPinout();
 }
 
 void Drive::setPid(double kp, double ki, double kd, double tau, double minOutput, double maxOutput, double minOutputInt, double maxOutputInt) 

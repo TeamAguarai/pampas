@@ -28,7 +28,7 @@ cd WiringPi
 ./build
 ```
 
-Por último, clona este repositorio e instala control.h ejecutando el makefile
+Por último, clona este repositorio e instala pampas.h ejecutando el makefile
 ```bash
 git clone https://github.com/TeamAguarai/pampas
 cd pampas

@@ -7,7 +7,7 @@
 #endif
 
 #ifdef CONTROL_LIBRARY
-    #include "control.h"
+    #include "pampas.h"
 #endif
 
 
@@ -18,7 +18,7 @@
 #include <sstream>
 
 
-namespace control { 
+namespace pampas { 
 
 class Writer {
 private:

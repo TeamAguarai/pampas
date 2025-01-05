@@ -7,12 +7,12 @@
 #endif
 
 #ifdef CONTROL_LIBRARY
-    #include "control.h"
+    #include "pampas.h"
 #endif
 
 #include <wiringPi.h>
 
-namespace control {
+namespace pampas {
     
 namespace gpio {
     void setupGpioPinout();

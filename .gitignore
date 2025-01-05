@@ -1,5 +1,9 @@
 .tmp.driveupload
 .tmp.drivedownload
-.vscode
+
 # para vscode extension de cpp
+.vscode
+
+# archivos de desarrollo interno
 wiringPi.h 
+pampas.h

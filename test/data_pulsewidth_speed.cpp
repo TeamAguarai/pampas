@@ -2,9 +2,9 @@
 #include <typeinfo>
 #include <string>
 #include <thread>
-#include "../control.h"
+#include "../pampas.h"
 
-using namespace control;
+using namespace pampas;
 
 int main() {
 

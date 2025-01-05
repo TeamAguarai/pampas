@@ -1,6 +1,6 @@
 #include <algorithm>
 
-namespace control
+namespace pampas
 {
 
 double clip(double n, double lower, double upper);

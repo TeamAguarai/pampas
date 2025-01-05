@@ -1,6 +1,6 @@
 #include "operations.h"
 
-namespace control
+namespace pampas
 {
 // ToDo: cambiar a Template
 double clip(double n, double lower, double upper) {

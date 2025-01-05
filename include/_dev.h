@@ -13,10 +13,10 @@
 #endif
 
 #ifdef CONTROL_LIBRARY
-    #include "control.h"
+    #include "pampas.h"
 #endif
 
-namespace control
+namespace pampas
 {
 void hello();
 }

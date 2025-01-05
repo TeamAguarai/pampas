@@ -2,7 +2,7 @@
 #include <thread>
 #include <atomic>
 #include <chrono>
-#include "../control.h"
+#include "../pampas.h"
 
 std::atomic<bool> running(true); // Controla si el hilo de velocidad sigue activo
 

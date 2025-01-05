@@ -7,11 +7,11 @@
 #endif
 
 #ifdef CONTROL_LIBRARY
-    #include "control.h"
+    #include "pampas.h"
 #endif
 
 /* Creditos: https://github.com/pms67/PID/blob/master/PID.cpp */
-namespace control {
+namespace pampas {
 
 PID::PID() 
 {

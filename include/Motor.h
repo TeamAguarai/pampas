@@ -8,12 +8,12 @@
 #endif
 
 #ifdef CONTROL_LIBRARY
-    #include "control.h"
+    #include "pampas.h"
 #endif
 
 #include <csignal>
 
-namespace control {
+namespace pampas {
     
 class Motor
 {

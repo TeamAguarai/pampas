@@ -13,27 +13,27 @@
 #endif
 
 #ifdef CONTROL_LIBRARY
-    #include "control.h"
+    #include "pampas.h"
 #endif
 
 
 #include <thread>
 #include <functional>
 
-namespace control {
+namespace pampas {
 
 
 class Drive {
 private:
     std::thread control;
-    control::PID pid; // el metodo pid.set debe de llamarse antes de mover al motor
+    pampas::PID pid; // el metodo pid.set debe de llamarse antes de mover al motor
     bool running = false;
     double runningSpeed = 0;
     void controlledSpeed(double speed);
 public:
-    control::Conversion MsToPulseWidth; // el metodo pulseWidthToMs.set debe de llamarse antes de mover al motor
-    control::Motor motor;
-    control::Velocimeter velocimeter;
+    pampas::Conversion MsToPulseWidth; // el metodo pulseWidthToMs.set debe de llamarse antes de mover al motor
+    pampas::Motor motor;
+    pampas::Velocimeter velocimeter;
     Drive();
     void run(double speed);
     void stop();

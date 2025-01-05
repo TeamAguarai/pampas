@@ -7,9 +7,9 @@
 #endif
 
 #ifdef CONTROL_LIBRARY
-    #include "control.h"
+    #include "pampas.h"
 #endif
-namespace control {
+namespace pampas {
     
 void PulseWidth::set(double min, double steady, double max) 
 { 

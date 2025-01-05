@@ -7,7 +7,7 @@
 #endif
 
 #ifdef CONTROL_LIBRARY
-    #include "control.h"
+    #include "pampas.h"
 #endif
 
 
@@ -16,7 +16,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace control {
+namespace pampas {
 
 class Conversion {
 private:
