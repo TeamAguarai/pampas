@@ -12,7 +12,7 @@ namespace pampas {
 
 void hello() 
 {
-    std::cout << "HELLO FROM CONTROL!" << std::endl;
+    std::cout << "HELLO FROM PAMPAS!" << std::endl;
 }
 
 }

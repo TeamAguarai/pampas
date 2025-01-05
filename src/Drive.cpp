@@ -1,12 +1,12 @@
-#if defined(CONTROL_DEV) && defined(CONTROL_LIBRARY)
-    #error "No se puede definir CONTROL_DEV y CONTROL_LIBRARY al mismo tiempo."
+#if defined(PAMPAS_DEV) && defined(PAMPAS_LIBRARY)
+    #error "No se puede definir PAMPAS_DEV y PAMPAS_LIBRARY al mismo tiempo."
 #endif
 
-#ifdef CONTROL_DEV
+#ifdef PAMPAS_DEV
     #include "Drive.h"
 #endif
 
-#ifdef CONTROL_LIBRARY
+#ifdef PAMPAS_LIBRARY
     #include "pampas.h"
 #endif
 
