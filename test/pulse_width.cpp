@@ -5,8 +5,8 @@ int main() {
     control::gpio::setupGpioPinout();
 
     control::Motor motor;
-    motor.definePin(13);
-    motor.pulseWidth.define(1.5, 1.5, 2.0);
+    motor.setPin(13);
+    motor.pulseWidth.set(1.5, 1.5, 2.0);
 
     double pulseWidth;
     while (true) {
