@@ -1,5 +1,5 @@
 <div align="center">
-<h1>Control</h1>
+<h1>pampas</h1>
 
 Controla un vehículo RC como el <a href="https://www.amazon.com/Hobao-HB-VS-C30BU-Hyper-Buggy-Engine/dp/B00MY3ROS2">HYPER VS 1/8 BUGGY NITRO</a> a través de un **Raspberry Pi 3** con *C++*
 </div>
@@ -12,8 +12,8 @@ Antes de empezar a programar debes de instalar las librerias necesarias.
 ### ⚡Método rápido (recomendado)
 En cualquier carpeta de tu sistema, clona este repositorio y ejecuta el archivo <a href="https://github.com/TeamAguarai/Control/blob/main/setup.sh">build.sh</a> (con permisos de administrador)
 ```bash
-git clone https://github.com/TeamAguarai/Control
-cd Control
+git clone https://github.com/TeamAguarai/pampas
+cd pampas
 chmod +x ./build.sh
 sudo ./build.sh
 ```
@@ -30,16 +30,16 @@ cd WiringPi
 
 Por último, clona este repositorio e instala control.h ejecutando el makefile
 ```bash
-git clone https://github.com/TeamAguarai/Control
-cd Control
+git clone https://github.com/TeamAguarai/pampas
+cd pampas
 sudo make
 ```
 
 
 ## 🎮 Uso
-Para poder poder compilar tus proyectos asegurate de incluir las banderas -lcontrol -lwiringPi
+Para poder poder compilar tus proyectos asegurate de incluir las banderas -lpampas -lwiringPi
 ```bash
-g++ main.cpp -o main -lcontrol -lwiringPi
+g++ main.cpp -o main -lpampas -lwiringPi
 ```
 
 
@@ -48,7 +48,7 @@ g++ main.cpp -o main -lcontrol -lwiringPi
 
 Utiliza un controlador PID para gestionar el movimiento del motor
 ```c
-control::Drive drive;
+pampas::Drive drive;
 drive.setPid(0.4369, 0.6735, 0, 0, 0, 7.4, -10, 10);
 drive.setTransferFunction(polinomialRegression);
 drive.setMotor(13, 1.57, 1.57, 2.0);
@@ -58,7 +58,7 @@ drive.run(2.5);
 
 Realiza mediciones de velocidad a traves de sensores de pulso (Efecto Hall, Infrarojo, etc.)
 ```c
-control::Velocimeter velocimeter;
+pampas::Velocimeter velocimeter;
 velocimeter.setPin(17);
 velocimeter.setWheelDiameter(0.105);
 
