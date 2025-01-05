@@ -9,6 +9,8 @@
 #ifdef PAMPAS_LIBRARY
     #include "pampas.h"
 #endif
+
+
 namespace pampas {
     
 void PulseWidth::set(double min, double steady, double max) 
