@@ -35,20 +35,20 @@ void Velocimeter::cleanup() {
     gpio::stopOnInterrupt(velocimeterInstance->pin);
 }
 
-void Velocimeter::definePin(int pin) 
+void Velocimeter::setPin(int pin) 
 {
     this->pin = pin;
 }
 
-void Velocimeter::defineWheelDiameter(double wheelDiameter) 
+void Velocimeter::setWheelDiameter(double wheelDiameter) 
 {
     this->wheelDiameter = wheelDiameter;
     this->wheelCircumference = 2 * (wheelDiameter/2) * 3.1416;
 }
 
-void Velocimeter::defineAlpha(double value)
+void Velocimeter::setAlpha(double value)
 {
-    this->filter.defineAlpha(value);
+    this->filter.setAlpha(value);
 }
 
 void Velocimeter::pulseHandlerWrapper() 

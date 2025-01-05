@@ -38,13 +38,13 @@ void Motor::cleanup()
     this->setPulseWidth(this->pulseWidth.steady);
 }
 
-void Motor::definePin(int pin) 
+void Motor::setPin(int pin) 
 {
     this->pin = pin;
     gpio::pinMode(pin, PWM_OUTPUT);
 }
 
-void Motor::definePulseWidthRange(double min, double steady, double max) {
+void Motor::setPulseWidthRange(double min, double steady, double max) {
     this->pulseWidth.set(min, steady, max);
 }
 

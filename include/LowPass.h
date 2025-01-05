@@ -19,7 +19,7 @@ private:
     double prevOutput = 0.0;  // Última salida (x_{n-1})
 
 public:
-    void defineAlpha(double value);
+    void setAlpha(double value);
     double filter(double input);
 };
 

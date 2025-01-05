@@ -49,18 +49,18 @@ g++ main.cpp -o main -lcontrol -lwiringPi
 Utiliza un controlador PID para gestionar el movimiento del motor
 ```c
 control::Drive drive;
-drive.definePid(0.4369, 0.6735, 0, 0, 0, 7.4, -10, 10);
-drive.defineTransferFunction(polinomialRegression);
-drive.defineMotor(13, 1.57, 1.57, 2.0);
-drive.defineVelocimeter(17, 0.105);
+drive.setPid(0.4369, 0.6735, 0, 0, 0, 7.4, -10, 10);
+drive.setTransferFunction(polinomialRegression);
+drive.setMotor(13, 1.57, 1.57, 2.0);
+drive.setVelocimeter(17, 0.105);
 drive.run(2.5);
 ```
 
 Realiza mediciones de velocidad a traves de sensores de pulso (Efecto Hall, Infrarojo, etc.)
 ```c
 control::Velocimeter velocimeter;
-velocimeter.definePin(17);
-velocimeter.defineWheelDiameter(0.105);
+velocimeter.setPin(17);
+velocimeter.setWheelDiameter(0.105);
 
 while (running)
 {

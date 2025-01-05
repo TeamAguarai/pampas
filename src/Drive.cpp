@@ -21,27 +21,27 @@ Drive::Drive()
     control::gpio::setupGpioPinout();
 }
 
-void Drive::definePid(double kp, double ki, double kd, double tau, double minOutput, double maxOutput, double minOutputInt, double maxOutputInt) 
+void Drive::setPid(double kp, double ki, double kd, double tau, double minOutput, double maxOutput, double minOutputInt, double maxOutputInt) 
 {
     this->pid.setGains(kp, ki, kd);
     this->pid.setParameters(tau, minOutput, maxOutput, minOutputInt, maxOutputInt);
 }
 
-void Drive::defineVelocimeter(int pin, double wheelDiameterCM, double alpha) 
+void Drive::setVelocimeter(int pin, double wheelDiameterCM, double alpha) 
 {
-    this->velocimeter.definePin(pin);
-    this->velocimeter.defineWheelDiameter(wheelDiameterCM);
-    this->velocimeter.defineAlpha(alpha);
+    this->velocimeter.setPin(pin);
+    this->velocimeter.setWheelDiameter(wheelDiameterCM);
+    this->velocimeter.setAlpha(alpha);
 }
 
 
-void Drive::defineMotor(int pin, double pulseWidthMin, double pulseWidthSteady, double pulseWidthMax) 
+void Drive::setMotor(int pin, double pulseWidthMin, double pulseWidthSteady, double pulseWidthMax) 
 {
-    this->motor.definePin(pin);
-    this->motor.definePulseWidthRange(pulseWidthMin, pulseWidthSteady, pulseWidthMax);
+    this->motor.setPin(pin);
+    this->motor.setPulseWidthRange(pulseWidthMin, pulseWidthSteady, pulseWidthMax);
 }
 
-void Drive::defineTransferFunction(std::function<double(double)> func) 
+void Drive::setTransferFunction(std::function<double(double)> func) 
 {
     this->MsToPulseWidth.set(func);
 }

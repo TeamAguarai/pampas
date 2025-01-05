@@ -15,7 +15,7 @@
 namespace control {  
 
 
-void LowPass::defineAlpha(double value) 
+void LowPass::setAlpha(double value) 
 {
     this->alpha = value;
 }

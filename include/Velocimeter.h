@@ -40,9 +40,9 @@ public:
     Velocimeter();
     ~Velocimeter();
     
-    void definePin(int pin);
-    void defineWheelDiameter(double wheelDiameter);
-    void defineAlpha(double alpha);
+    void setPin(int pin);
+    void setWheelDiameter(double wheelDiameter);
+    void setAlpha(double alpha);
 
     double getUpdateTimeInterval();
     double getSpeed();

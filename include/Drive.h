@@ -39,10 +39,10 @@ public:
     void stop();
 
     /* Llamar estos metodos antes de mover al motor */
-    void definePid(double kp, double ki, double kd, double tau, double minOutput, double maxOutput, double minOutputInt, double maxOutputInt);
-    void defineTransferFunction(std::function<double(double)> func);
-    void defineMotor(int pin, double pulseWidthMin, double pulseWidthSteady, double pulseWidthMax);
-    void defineVelocimeter(int pin, double wheelDiameter, double alpha);
+    void setPid(double kp, double ki, double kd, double tau, double minOutput, double maxOutput, double minOutputInt, double maxOutputInt);
+    void setTransferFunction(std::function<double(double)> func);
+    void setMotor(int pin, double pulseWidthMin, double pulseWidthSteady, double pulseWidthMax);
+    void setVelocimeter(int pin, double wheelDiameter, double alpha);
 };
 
 }
