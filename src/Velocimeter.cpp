@@ -113,7 +113,12 @@ void Velocimeter::waitForUpdate(double timeoutSeconds)
         gpio::delay(10); // para evitar sobrecarga
     }
 
-    if (timeDifference >= timeoutSeconds) this->speed = 0; // cuando se cumple el timeout, la velocidad se supone que es nula
+    if (timeDifference >= timeoutSeconds) {
+        this->speed = 0; // cuando se cumple el timeout, la velocidad se supone que es nula
+        // Como el sensor nunca detecto pulso, nunca se registra un intervalo de tiempo
+        // para eso se le da un nuevo valor que es el timeOut 
+        this->timeInterval = timeoutSeconds;
+    }
 }
 
 }
