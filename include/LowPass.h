@@ -10,6 +10,9 @@
     #include "pampas.h"
 #endif
 
+/*
+    Clase LowPass: creado por ChatGPT
+*/
 
 namespace pampas {
     

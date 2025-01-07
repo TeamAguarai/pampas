@@ -14,17 +14,25 @@
 Clase Error: creado por ChatGPT
 */
 
+#include <string>
 #include <iostream>
 #include <stdexcept> 
-#include <string>
 #include <sstream>   
 
-class Error : public std::runtime_error {
+
+namespace pampas {
+
+class Exception : public std::runtime_error {
 public:
-    Error(const std::string& message, const std::string& file, int line);
+    Exception(const std::string& message, const std::string& file, int line)
+    : std::runtime_error(formatMessage(message, file, line)) {}
 
 private:
     static std::string formatMessage(const std::string& message, const std::string& file, int line);
 };
 
-#define THROW_ERROR(msg) throw Error(msg, __FILE__, __LINE__)
+
+void throwError(std::string msg);
+
+}
+
