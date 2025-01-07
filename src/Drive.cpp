@@ -61,13 +61,13 @@ void Drive::controlledSpeed(double speed)
         this->velocimeter.waitForUpdate();
 
         // Calcular velocidad utilizando PID
-        double movementSpeed = this->pid.calculate(
+        double newSpeed = this->pid.calculate(
             speed, 
             this->velocimeter.getSpeed(), 
             this->velocimeter.getUpdateTimeInterval()
         );
 
-        this->motor.setPulseWidth(this->MsToPulseWidth.convert(movementSpeed));
+        this->motor.setPulseWidth(this->MsToPulseWidth.convert(newSpeed));
     }
 }
 
