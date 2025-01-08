@@ -29,9 +29,7 @@ void Steer::steer(double value, double proportionalConstant) // -1 < value < 1
 
     double pulseWidthValue = pampas::remap(value, this->min, this->max, this->servo.pulseWidth.min, this->servo.pulseWidth.max);
     
-    std::cout << "PW STEER:" << pulseWidthValue * proportionalConstant << std::endl; // for debug
-    
-    // this->servo.setPulseWidth(pulseWidthValue);
+    this->servo.setPulseWidth(pulseWidthValue);
 }
 
 }

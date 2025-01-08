@@ -10,7 +10,7 @@
     #include "pampas.h"
 #endif
 
-/* Creditos: https://github.com/pms67/PID/blob/master/PID.cpp */
+/* Creditos: https://github.com/pms67/PID/blob/master/PID.c */
 namespace pampas {
 
 PID::PID() 

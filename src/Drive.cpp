@@ -80,8 +80,6 @@ void Drive::run(double speed)
     this->running = true;
     
     this->control = std::thread(&Drive::controlledSpeed, this, speed);
-    
-
 }
 
 }

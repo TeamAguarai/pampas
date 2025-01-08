@@ -12,7 +12,6 @@
 
 
 #define PWM_FREQUENCY 76.92
-#include <wiringPi.h> 
 
 
 
@@ -37,9 +36,9 @@ namespace gpio {
         int divisor = static_cast<int>(19200000.0 / (PWM_FREQUENCY * range)); // PWM clock at 19.2 MHz
 
         // Set the divisor and range
-        pwmSetMode(0);      // "Mark-Space" mode for precision
-        pwmSetRange(range);           // Set the range for the duty cycle
-        pwmSetClock(divisor);         // Set the divisor to adjust the frequency
+        ::pwmSetMode(0);      // "Mark-Space" mode for precision
+        ::pwmSetRange(range);           // Set the range for the duty cycle
+        ::pwmSetClock(divisor);         // Set the divisor to adjust the frequency
 
         // Calculate the duty cycle corresponding to the desired pulse width
         int dutyCycle = static_cast<int>((pulseWidthMs / periodMs) * range);
