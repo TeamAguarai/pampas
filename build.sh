@@ -9,7 +9,7 @@ else
     hash -r
     git clone https://github.com/WiringPi/WiringPi.git
     cd WiringPi
-    ./build.sh
+    ./build
 fi
 
 make
