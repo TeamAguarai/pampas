@@ -5,7 +5,7 @@ Controla un vehículo RC como el <a href="https://www.amazon.com/Hobao-HB-VS-C30
 </div>
 
 ## ⚠️ Instalación
-> El proyecto está diseñado únicamente para un vehículo con características idénticas al [HYPER VS 1/8 BUGGY NITRO](https://www.amazon.com/Hobao-HB-VS-C30BU-Hyper-Buggy-Engine/dp/B00MY3ROS2) y únicamente puede ser instalada en un Raspberry Pi.
+> El proyecto está diseñado únicamente para un vehículo con características idénticas al [HYPER VS 1/8 BUGGY NITRO](https://www.amazon.com/Hobao-HB-VS-C30BU-Hyper-Buggy-Engine/dp/B00MY3ROS2) y únicamente puede ser instalado en un Raspberry Pi.
 
 Antes de empezar a programar debes de instalar las librerias necesarias.
 
