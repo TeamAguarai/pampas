@@ -1,13 +1,5 @@
-#if defined(PAMPAS_DEV) && defined(PAMPAS_LIBRARY)
-    #error "No se puede definir PAMPAS_DEV y PAMPAS_LIBRARY al mismo tiempo."
-#endif
-
-#ifdef PAMPAS_DEV
+#ifdef USING_VSCODE_AS_EDITOR
     #include "Velocimeter.h"
-#endif
-
-#ifdef PAMPAS_LIBRARY
-    #include "pampas.h"
 #endif
 
 namespace pampas {
@@ -110,7 +102,7 @@ void Velocimeter::waitForUpdate(double timeoutSeconds)
     while (!this->udpated && timeDifference <= timeoutSeconds) {
         end = std::chrono::steady_clock::now();
         timeDifference = std::chrono::duration_cast<std::chrono::seconds>(end - begin).count();
-        gpio::delay(10); // para evitar sobrecarga
+        delay(10); // para evitar sobrecarga
     }
 
     if (timeDifference >= timeoutSeconds) {

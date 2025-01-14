@@ -1,15 +1,4 @@
-#if defined(PAMPAS_DEV) && defined(PAMPAS_LIBRARY)
-    #error "No se puede definir PAMPAS_DEV y PAMPAS_LIBRARY al mismo tiempo."
-#endif
-
-#ifdef PAMPAS_DEV
-    #pragma once
-#endif
-
-#ifdef PAMPAS_LIBRARY
-    #include "pampas.h"
-#endif
-
+#define PWM_FREQUENCY 76.92
 #include <wiringPi.h>
 
 namespace pampas {
@@ -20,7 +9,6 @@ namespace gpio {
     void pinMode(int pin, int mode);
     void digitalWrite(int pin, int value);
     int digitalRead(int pin);
-    void delay(int ms);
     void onInterrupt (int pin, int edgeType,  void (*function)(void));
     void stopOnInterrupt(int pin);
     void reset();

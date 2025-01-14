@@ -1,13 +1,5 @@
-#if defined(PAMPAS_DEV) && defined(PAMPAS_LIBRARY)
-    #error "No se puede definir PAMPAS_DEV y PAMPAS_LIBRARY al mismo tiempo."
-#endif
-
-#ifdef PAMPAS_DEV
+#ifdef USING_VSCODE_AS_EDITOR
     #include "PID.h"
-#endif
-
-#ifdef PAMPAS_LIBRARY
-    #include "pampas.h"
 #endif
 
 /* Creditos: https://github.com/pms67/PID/blob/master/PID.c */

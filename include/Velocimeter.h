@@ -1,23 +1,14 @@
+#ifdef USING_VSCODE_AS_EDITOR
+    #include "LowPass.h"
+    #include "gpio.h"
+    #include "operations.h"
+#endif
+
 #include <time.h>
 #include <functional>
 #include <csignal>
 #include <chrono>
 #include <stdexcept>
-
-#if defined(PAMPAS_DEV) && defined(PAMPAS_LIBRARY)
-    #error "No se puede definir PAMPAS_DEV y PAMPAS_LIBRARY al mismo tiempo."
-#endif
-
-#ifdef PAMPAS_DEV
-    #pragma once
-    #include "LowPass.h"
-    #include "gpio.h"
-#endif
-
-#ifdef PAMPAS_LIBRARY
-    #include "pampas.h"
-#endif
-
 
 namespace pampas {   
 
@@ -49,7 +40,7 @@ public:
     double getDistance();
     void resetDistance();
 
-    void waitForUpdate(double timeoutSeconds = 6.0);
+    void waitForUpdate(double timeoutSeconds = 2.0);
     void start(); // este metodo debe llamarse al iniciar las mediciones de velocidad
     void cleanup(); // llamar si o si a este metodo al final del programa, en caso de un programa abortado ejecutara automaticamente.
 };

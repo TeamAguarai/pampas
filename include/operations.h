@@ -1,11 +1,14 @@
 #include <algorithm>
+#include <wiringPi.h>
 
 namespace pampas
 {
 
 /*
-Creditos: https://stackoverflow.com/questions/8684327/c-map-number-ranges
+    Referencia: https://stackoverflow.com/questions/8684327/c-map-number-ranges
 */
-float remap(float value, float in_min, float in_max, float out_min, float out_max);
-    
+template <typename T>
+T remap(T value, T in_min, T in_max, T out_min, T out_max);
+
+void delay(int ms);
 } 

@@ -1,18 +1,6 @@
-#if defined(PAMPAS_DEV) && defined(PAMPAS_LIBRARY)
-    #error "No se puede definir PAMPAS_DEV y PAMPAS_LIBRARY al mismo tiempo."
-#endif
-
-#ifdef PAMPAS_DEV
+#ifdef USING_VSCODE_AS_EDITOR
     #include "gpio.h"
 #endif
-
-#ifdef PAMPAS_LIBRARY
-    #include "pampas.h"
-#endif
-
-
-#define PWM_FREQUENCY 76.92
-
 
 
 namespace pampas {
@@ -58,10 +46,6 @@ namespace gpio {
 
     int digitalRead(int pin) {
         return ::digitalRead(pin);
-    }
-
-    void delay(int ms) {
-        ::delay(ms);  
     }
 
     void onInterrupt (int pin, int edgeType,  void (*function)(void)) {

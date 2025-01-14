@@ -1,13 +1,5 @@
-#if defined(PAMPAS_DEV) && defined(PAMPAS_LIBRARY)
-    #error "No se puede definir PAMPAS_DEV y PAMPAS_LIBRARY al mismo tiempo."
-#endif
-
-#ifdef PAMPAS_DEV
-    #include "../include/Exception.h"
-#endif
-
-#ifdef PAMPAS_LIBRARY
-    #include "pampas.h"
+#ifdef USING_VSCODE_AS_EDITOR
+    #include "Exception.h"
 #endif
 
 
@@ -21,7 +13,7 @@ std::string Exception::formatMessage(const std::string& message, const std::stri
     return oss.str();
 }
 
-void throwError(std::string msg) {
+void raiseError(std::string msg) {
     throw Exception(msg, __FILE__, __LINE__);
 }
 
