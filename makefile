@@ -10,6 +10,9 @@ OBJ = build/pampas.o
 
 default: build combine compile install
 
+build:
+	mkdir -p build
+
 combine:
 	for file in $(HDR); do cat $$file; echo ""; done > $(COMBINED_HDR)
 	for file in $(SRC); do cat $$file; echo ""; done > $(COMBINED_SRC)
@@ -22,9 +25,6 @@ compile:
 install:
 	mv -f build/libpampas.so /usr/lib/ 
 	cp $(COMBINED_HDR) /usr/local/include/pampas.h
-
-build:
-	mkdir -p build
 
 clean:
 	rm -rf build
