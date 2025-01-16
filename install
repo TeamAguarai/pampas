@@ -1,0 +1,5 @@
+#!/bin/bash
+
+./scripts/simplify.sh src include pampas simplified
+
+./scripts/install simplified/pampas.cpp simplified/pampas.h pampas

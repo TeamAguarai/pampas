@@ -2,11 +2,13 @@
 #include <typeinfo>
 #include <string>
 #include <thread>
-#include "../pampas.h"
+#include "../include/Writer.h"
 
 using namespace pampas;
 
 int main() {
+
+    Write
 
     gpio::setupGpioPinout();
 

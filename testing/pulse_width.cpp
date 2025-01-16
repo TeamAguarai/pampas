@@ -1,5 +1,6 @@
 #include <iostream>
-#include "../pampas.h"
+#include "gpio.h"
+#include "Motor.h"
 
 int main() {
     pampas::gpio::setupGpioPinout();

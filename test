@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ "$#" -lt 2 ]; then
+    echo "Uso: $0 <SOURCE_CPP> <OUTPUT_EXECUTABLE>"
+    exit 1
+fi
+
+
+FILE_TO_TEST=$1
+OUTPUT=$2
+
+./scripts/simplify.sh src include pampas minipampas
+
+cp $FILE_TO_TEST.cpp minipampas/
+
+echo -e "all:\n\tg++ $FILE_TO_TEST.cpp pampas.cpp -o $OUTPUT -lwiringPi\n\t./$OUTPUT" > minipampas/makefile
