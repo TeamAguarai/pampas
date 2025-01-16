@@ -7,9 +7,6 @@ Controla un vehículo RC como el <a href="https://www.amazon.com/Hobao-HB-VS-C30
 ## ⚠️ Instalación
 > El proyecto está diseñado únicamente para un vehículo con características idénticas al [HYPER VS 1/8 BUGGY NITRO](https://www.amazon.com/Hobao-HB-VS-C30BU-Hyper-Buggy-Engine/dp/B00MY3ROS2) y únicamente puede ser instalado en un Raspberry Pi.
 
-Antes de empezar a programar debes de instalar las librerias necesarias.
-
-### ⚡Método rápido (recomendado)
 En cualquier carpeta de tu sistema, clona este repositorio y ejecuta el archivo <a href="https://github.com/TeamAguarai/Control/blob/main/install">install</a> (con permisos de administrador)
 ```bash
 git clone https://github.com/TeamAguarai/pampas
@@ -18,24 +15,6 @@ chmod +x ./install
 chmod +x ./scripts/*.sh
 sudo ./install
 ```
-
-### 🤓 Método Hazlo tu mismo
-Primero, en caso de no tenerlo instalado, instala WiringPi
-```bash
-sudo apt-get purge wiringpi
-hash -r
-git clone https://github.com/WiringPi/WiringPi.git
-cd WiringPi
-./build
-```
-
-Por último, clona este repositorio e instala pampas.h ejecutando el makefile <a href="https://github.com/TeamAguarai/Control/blob/main/makefile">makefile</a> (con permisos de administrador)
-```bash
-git clone https://github.com/TeamAguarai/pampas
-cd pampas
-sudo make
-```
-
 
 ## 🎮 Uso
 Para poder poder compilar tus proyectos asegurate de incluir las banderas -lpampas -lwiringPi
