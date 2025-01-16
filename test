@@ -11,6 +11,6 @@ OUTPUT=$2
 
 ./scripts/simplify.sh src include pampas minipampas
 
-cp $FILE_TO_TEST.cpp minipampas/
+cp $FILE_TO_TEST minipampas/
 
 echo -e "all:\n\tg++ $FILE_TO_TEST.cpp pampas.cpp -o $OUTPUT -lwiringPi\n\t./$OUTPUT" > minipampas/makefile
