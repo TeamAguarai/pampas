@@ -10,7 +10,7 @@ Controla un vehículo RC como el <a href="https://www.amazon.com/Hobao-HB-VS-C30
 Antes de empezar a programar debes de instalar las librerias necesarias.
 
 ### ⚡Método rápido (recomendado)
-En cualquier carpeta de tu sistema, clona este repositorio y ejecuta el archivo <a href="https://github.com/TeamAguarai/Control/blob/main/build.sh">build.sh</a> (con permisos de administrador)
+En cualquier carpeta de tu sistema, clona este repositorio y ejecuta el archivo <a href="https://github.com/TeamAguarai/Control/blob/main/install">install</a> (con permisos de administrador)
 ```bash
 git clone https://github.com/TeamAguarai/pampas
 cd pampas
