@@ -8,4 +8,5 @@
 wiringPi.h 
 pampas.h
 
-bundle/
+simplified/
+minipampas/
