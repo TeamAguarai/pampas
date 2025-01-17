@@ -32,9 +32,9 @@ float calculateYaw(float ax, float ay, float az, float mx, float my, float mz) {
 }
 
 int main() {
-    const std::string calibrationFile = "calibration.csv";
+    const std::string calibrationFile = "calibration.txt";
     pampas::MPU9250 IMU;
-
+    std::cout << "NO CALIBRACION MPU" << std::endl;
     // Inicializar el sensor
     int status = IMU.begin();
     if (status < 0) {
@@ -43,7 +43,8 @@ int main() {
     }
 
     // Manejar calibración (se puede sobrescribir si es necesario)
-    if (!IMU.handleCalibration(true)) { // Cambiar a `true` para sobrescribir
+    // if (!IMU.handleCalibration(true)) { // Cambiar a `true` para sobrescribir
+    if (!IMU.handleCalibration(false)) { // Cambiar a `true` para sobrescribir
         cerr << "Error: No se pudo completar la calibración." << endl;
         return -1;
     }
