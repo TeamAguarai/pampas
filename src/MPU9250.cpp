@@ -524,46 +524,92 @@ bool MPU9250::saveCalibration() {
     return true;
 }
 
+#include <algorithm>
+#include <cctype>
+
+// Función para eliminar espacios al inicio y al final de una cadena
+std::string trim(const std::string& str) {
+    auto start = str.begin();
+    while (start != str.end() && std::isspace(*start)) {
+        start++;
+    }
+
+    auto end = str.end();
+    do {
+        end--;
+    } while (std::distance(start, end) > 0 && std::isspace(*end));
+
+    return std::string(start, end + 1);
+}
+
 bool MPU9250::loadCalibration() {
     std::ifstream file(calibration_filename);
     if (!file.is_open()) {
-        std::cerr << "Error: No se pudo abrir el archivo para cargar la calibracion." << std::endl;
+        std::cerr << "Error: No se pudo abrir el archivo para cargar la calibración." << std::endl;
         return false;
     }
 
     std::string line;
+    // Saltar la primera línea (encabezado)
+    std::getline(file, line);
+
     while (std::getline(file, line)) {
         std::stringstream ss(line);
         std::string sensor, bias_str, scale_str;
-        if (std::getline(ss, sensor, ',') && std::getline(ss, bias_str, ',') && std::getline(ss, scale_str, ',')) {
-            float bias = std::stof(bias_str);
-            float scale = std::stof(scale_str);
 
-            if (sensor == "Gyro_X") {
-                _gxb = bias;
-            } else if (sensor == "Gyro_Y") {
-                _gyb = bias;
-            } else if (sensor == "Gyro_Z") {
-                _gzb = bias;
-            } else if (sensor == "Accel_X") {
-                _axb = bias;
-                _axs = scale;
-            } else if (sensor == "Accel_Y") {
-                _ayb = bias;
-                _ays = scale;
-            } else if (sensor == "Accel_Z") {
-                _azb = bias;
-                _azs = scale;
-            } else if (sensor == "Mag_X") {
-                _hxb = bias;
-                _hxs = scale;
-            } else if (sensor == "Mag_Y") {
-                _hyb = bias;
-                _hys = scale;
-            } else if (sensor == "Mag_Z") {
-                _hzb = bias;
-                _hzs = scale;
+        // Leer columnas
+        if (std::getline(ss, sensor, ',') && std::getline(ss, bias_str, ',') && std::getline(ss, scale_str, ',')) {
+            try {
+                // Limpiar cadenas
+                sensor = trim(sensor);
+                bias_str = trim(bias_str);
+                scale_str = trim(scale_str);
+
+                // Convertir a float
+                size_t idx1 = 0, idx2 = 0;
+                float bias = std::stof(bias_str, &idx1);
+                float scale = std::stof(scale_str, &idx2);
+
+                if (idx1 != bias_str.size() || idx2 != scale_str.size()) {
+                    std::cerr << "Error: Valor no numérico en línea: " << line << std::endl;
+                    continue;
+                }
+
+                // Asignar valores
+                if (sensor == "Gyro_X") {
+                    _gxb = bias;
+                } else if (sensor == "Gyro_Y") {
+                    _gyb = bias;
+                } else if (sensor == "Gyro_Z") {
+                    _gzb = bias;
+                } else if (sensor == "Accel_X") {
+                    _axb = bias;
+                    _axs = scale;
+                } else if (sensor == "Accel_Y") {
+                    _ayb = bias;
+                    _ays = scale;
+                } else if (sensor == "Accel_Z") {
+                    _azb = bias;
+                    _azs = scale;
+                } else if (sensor == "Mag_X") {
+                    _hxb = bias;
+                    _hxs = scale;
+                } else if (sensor == "Mag_Y") {
+                    _hyb = bias;
+                    _hys = scale;
+                } else if (sensor == "Mag_Z") {
+                    _hzb = bias;
+                    _hzs = scale;
+                }
+            } catch (const std::invalid_argument& e) {
+                std::cerr << "Error: Valor no válido en línea: " << line << std::endl;
+                continue;
+            } catch (const std::out_of_range& e) {
+                std::cerr << "Error: Valor fuera de rango en línea: " << line << std::endl;
+                continue;
             }
+        } else {
+            std::cerr << "Error: Formato de línea no válido: " << line << std::endl;
         }
     }
 
