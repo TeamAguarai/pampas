@@ -13,4 +13,5 @@ OUTPUT=$2
 
 cp $FILE_TO_TEST minipampas/
 
+# crear makefile
 echo -e "all:\n\tg++ $(basename "$FILE_TO_TEST") pampas.cpp -o $OUTPUT -lwiringPi\n\t./$OUTPUT" > minipampas/makefile
