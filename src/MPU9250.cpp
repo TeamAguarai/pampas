@@ -643,7 +643,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 */
 
 /* MPU9250 object, input the I2C bus and address */
-MPU9250::MPU9250(){
+MPU9250::MPU9250(std::string calibration_filename):calibration_filename(calibration_filename){
     _address = 0x68; // I2C address
     _useSPI = false; // set to use I2C
     _axb = 0.0f;

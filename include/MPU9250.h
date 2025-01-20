@@ -103,7 +103,7 @@ public:
         LP_ACCEL_ODR_250HZ = 10,
         LP_ACCEL_ODR_500HZ = 11
     };
-    MPU9250();
+    MPU9250(std::string calibration_filename);
     int begin();
     int setAccelRange(AccelRange range);
     int setGyroRange(GyroRange range);
@@ -162,7 +162,7 @@ public:
 
 protected:
     // Funcionalidad pampas original
-    std::string calibration_filename = "PAMPAS_MPU9250_CALIBRATION_CONFIG";
+    std::string calibration_filename;
     bool calibrate();
     bool calibrationFileExists();
     bool saveCalibration();
