@@ -11,8 +11,7 @@ En cualquier carpeta de tu sistema, clona este repositorio y ejecuta el archivo 
 ```bash
 git clone https://github.com/TeamAguarai/pampas
 cd pampas
-chmod +x ./install
-chmod +x ./scripts/*.sh
+chmod +x install scripts/*
 sudo ./install
 ```
 
