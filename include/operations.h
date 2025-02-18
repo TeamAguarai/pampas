@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <wiringPi.h>
+#include <chrono>
 
 namespace pampas
 {

@@ -26,7 +26,7 @@ private:
     bool started = false;
     bool udpated = false;
     void pulseHandler();
-    LowPass filter;
+    LowPass<double> filter;
 public:
     Velocimeter();
     ~Velocimeter();

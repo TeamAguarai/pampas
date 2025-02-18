@@ -11,7 +11,7 @@ T remap(T value, T in_min, T in_max, T out_min, T out_max) {
 }
 
 void delay(int ms) {
-	::delay(ms);  
+	::delay(ms); // wiringPi function
 }
 
 }

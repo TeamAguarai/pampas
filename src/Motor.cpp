@@ -27,7 +27,7 @@ void Motor::cleanup()
 void Motor::setPin(int pin) 
 {
     this->pin = pin;
-    gpio::pinMode(pin, PWM_OUTPUT);
+    gpio::pinMode(pin, PWM_OUTPUT); // PWM_OUTPUT is a wiringPi constant
 }
 
 void Motor::setPulseWidthRange(double min, double steady, double max) {
