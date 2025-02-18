@@ -1,13 +1,18 @@
+
 namespace pampas {
-    
+
+template<typename T>
 class LowPass {
 private:
-    double alpha;       // Coeficiente de suavizado
-    double prevOutput = 0.0;  // Última salida (x_{n-1})
-
+    T alpha;       // Coeficiente de suavizado (debe ser inicializado con setAlpha)
+    T prevOutput;  
+    bool alphaDefined = false;
 public:
-    void setAlpha(double value);
-    double filter(double input);
+    LowPass();  
+    void setInitialValue(T value);
+    void setAlpha(T value);
+    T filter(T input);
 };
 
-}
+} // namespace pampas
+
