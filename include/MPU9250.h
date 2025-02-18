@@ -7,6 +7,7 @@ Creditos: https://github.com/ranranff/mpu9250/
 #ifdef USING_VSCODE_AS_EDITOR
     #include "Writer.h"
     #include "operations.h"
+    #include "I2Cdev.h"
 #endif
 
 
@@ -33,35 +34,26 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <stdint.h>
-#include <stddef.h>
-#include <unistd.h>
-#include <cstring>
-#include <cmath>
 
-#define I2C_OK 0
-#define I2C_ERR -1
 
 namespace pampas {
 
+// int8_t readBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t *data);
+// int8_t readBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t *data);
+// int8_t readBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint16_t *data);
+// int8_t readByte(uint8_t devAddr, uint8_t regAddr, uint8_t *data);
+// int8_t readWord(uint8_t devAddr, uint8_t regAddr, uint16_t *data);
+// int8_t readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data);
+// int8_t readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t *data);
 
-
-int8_t readBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t *data);
-int8_t readBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t *data);
-int8_t readBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint16_t *data);
-int8_t readByte(uint8_t devAddr, uint8_t regAddr, uint8_t *data);
-int8_t readWord(uint8_t devAddr, uint8_t regAddr, uint16_t *data);
-int8_t readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data);
-int8_t readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t *data);
-
-int writeBit(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint8_t data);
-int writeBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t data);
-int writeBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t data);
-int writeBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint16_t data);
-int writeByte(uint8_t devAddr, uint8_t regAddr, uint8_t data);
-int writeWord(uint8_t devAddr, uint8_t regAddr, uint16_t data);
-int writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data);
-int writeWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t *data);
+// int writeBit(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint8_t data);
+// int writeBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t data);
+// int writeBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t data);
+// int writeBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint16_t data);
+// int writeByte(uint8_t devAddr, uint8_t regAddr, uint8_t data);
+// int writeWord(uint8_t devAddr, uint8_t regAddr, uint16_t data);
+// int writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data);
+// int writeWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t *data);
 
 class MPU9250{
 public:
@@ -103,7 +95,12 @@ public:
         LP_ACCEL_ODR_250HZ = 10,
         LP_ACCEL_ODR_500HZ = 11
     };
-    MPU9250(std::string calibration_filename);
+    MPU9250();
+
+    void calibrate(); // calibrar para uso unico sin guardar los datos en memoria
+    void calibrate(std::string calibration_output_filename); // calibrar para uso unico y guardar los datos en un archivo
+    int loadCalibration(std::string file_path); 
+    
     int begin();
     int setAccelRange(AccelRange range);
     int setGyroRange(GyroRange range);
@@ -125,7 +122,7 @@ public:
     float getMagZ_uT();
     float getTemperature_C();
     
-    int calibrateGyro();
+    int calibrateGyro(int durationSeconds); 
     float getGyroBiasX_rads();
     float getGyroBiasY_rads();
     float getGyroBiasZ_rads();
@@ -156,18 +153,8 @@ public:
     void setMagCalZ(float bias,float scaleFactor);
 
 
-    // Funcionalidad pampas original
-    bool handleCalibration(bool overwriteCalibrationFile);
-
-
 protected:
-    // Funcionalidad pampas original
-    std::string calibration_filename;
-    bool calibrate();
-    bool calibrationFileExists();
-    bool saveCalibration();
-    bool loadCalibration();
-    
+    int saveCalibration(std::string path_to_save_calibration_output);
     // i2c
     uint8_t _address = 0x00;
     const uint32_t _i2cRate = 400000; // 400 kHz
@@ -216,19 +203,23 @@ protected:
 
     const float _tempScale  = 333.87f;
     const float _tempOffset = 21.0f;
-    // configuration
+    
+    // default configuration
     AccelRange _accelRange   = ACCEL_RANGE_2G;
     GyroRange _gyroRange     = GYRO_RANGE_250DPS;
     DlpfBandwidth _bandwidth = DLPF_BANDWIDTH_184HZ;
     uint8_t _srd = 0;
+
     // gyro bias estimation
-    size_t _numSamples = 100;
-    double _gxbD = 0.0;
-    double _gybD = 0.0;
-    double _gzbD = 0.0;
+    size_t _numSamples = 0;
+    size_t _gyroNumSamples = 0;
+    float _gxbD = 0.0;
+    float _gybD = 0.0;
+    float _gzbD = 0.0;
     float  _gxb  = 0.0f;
     float  _gyb  = 0.0f;
     float  _gzb  = 0.0f;
+
     // accel bias and scale factor estimation
     double _axbD  = 0.0;
     double _aybD  = 0.0;
@@ -442,25 +433,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ===============================================
 */
-#include <stdint.h>
+// #include <stdint.h>
 
-#define I2C_OK 0
-#define I2C_ERR -1
+// #define I2C_OK 0
+// #define I2C_ERR -1
 
-int8_t readBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t *data);
-int8_t readBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t *data);
-int8_t readBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint16_t *data);
-int8_t readByte(uint8_t devAddr, uint8_t regAddr, uint8_t *data);
-int8_t readWord(uint8_t devAddr, uint8_t regAddr, uint16_t *data);
-int8_t readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data);
-int8_t readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t *data);
+// int8_t readBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t *data);
+// int8_t readBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t *data);
+// int8_t readBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint16_t *data);
+// int8_t readByte(uint8_t devAddr, uint8_t regAddr, uint8_t *data);
+// int8_t readWord(uint8_t devAddr, uint8_t regAddr, uint16_t *data);
+// int8_t readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data);
+// int8_t readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t *data);
 
-int writeBit(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint8_t data);
-int writeBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t data);
-int writeBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t data);
-int writeBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint16_t data);
-int writeByte(uint8_t devAddr, uint8_t regAddr, uint8_t data);
-int writeWord(uint8_t devAddr, uint8_t regAddr, uint16_t data);
-int writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data);
-int writeWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t *data);
+// int writeBit(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint8_t data);
+// int writeBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t data);
+// int writeBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t data);
+// int writeBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint16_t data);
+// int writeByte(uint8_t devAddr, uint8_t regAddr, uint8_t data);
+// int writeWord(uint8_t devAddr, uint8_t regAddr, uint16_t data);
+// int writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data);
+// int writeWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t *data);
 
