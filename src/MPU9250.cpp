@@ -1,77 +1,14 @@
 #ifdef USING_VSCODE_AS_EDITOR
-    #include "MPU9250.h"
+#include "MPU9250.h"
 #endif
-
-namespace pampas
-{
-
-
-/* writes a byte to MPU9250 register given a register address and data */
-int MPU9250::writeRegister(uint8_t subAddress, uint8_t data){
-
-    writeByte(_address, subAddress, data);
-
-    delay(10); 
-
-    /* read back the register */
-    readRegisters(subAddress, 1, _buffer);
-    /* check the read back register against the written register */
-
-    if(_buffer[0] == data) {
-        return 1;
-    }
-    else{
-        return -1;
-    }
-}
-
-/* reads registers from MPU9250 given a starting register address, number of bytes, and a pointer to store data */
-int MPU9250::readRegisters(uint8_t subAddress, uint8_t count, uint8_t* dest){
-    if ( count == readBytes(_address, subAddress, count, dest)){
-        return 0;
-    }
-    else {
-        return -1;
-    }
-
-}
-
-void MPU9250::calibrate() {
-    this->calibrateGyro(10);
-}
-
-void MPU9250::calibrate(std::string calibration_output_filename) {
-    std::cout << "Inicio proceso de calibracion (10 segundos). MANTENGA AL SENSOR PLANO Y QUIETO\n";
-    
-    this->calibrateGyro(10);
-    this->saveCalibration(calibration_output_filename);
-
-    std::cout << "Fin Calibracion.\n";
-}
-    
-int MPU9250::saveCalibration(std::string path_to_save_calibration_output) {
-    Writer writer(path_to_save_calibration_output, "Sensor,Bias,Scale");
-    writer.write_row({"Samples for Gyro: ", std::to_string(_gyroNumSamples)});
-    writer.write_row({"Gyro_Bias_X", std::to_string(getGyroBiasX_rads()), "1.0"});
-    writer.write_row({"Gyro_Bias_Y", std::to_string(getGyroBiasY_rads()), "1.0"});
-    writer.write_row({"Gyro_Bias_Z", std::to_string(getGyroBiasZ_rads()), "1.0"});
-
-    // writer.write_row({"Accel_X", std::to_string(_axb), std::to_string(_axs)});
-    // writer.write_row({"Accel_Y", std::to_string(_ayb), std::to_string(_ays)});
-    // writer.write_row({"Accel_Z", std::to_string(_azb), std::to_string(_azs)});
-
-    // writer.write_row({"Mag_X", std::to_string(_hxb), std::to_string(_hxs)});
-    // writer.write_row({"Mag_Y", std::to_string(_hyb), std::to_string(_hys)});
-    // writer.write_row({"Mag_Z", std::to_string(_hzb), std::to_string(_hzs)});
-
-    writer.close();
-    return 1;
-}
 
 #include <algorithm>
 #include <cctype>
 
-// Función para eliminar espacios al inicio y al final de una cadena
+namespace pampas
+{
+
+/* deletes spaces from a string */
 std::string trim(const std::string& str) {
     auto start = str.begin();
     while (start != str.end() && std::isspace(*start)) {
@@ -86,108 +23,7 @@ std::string trim(const std::string& str) {
     return std::string(start, end + 1);
 }
 
-int MPU9250::loadCalibration(std::string file_path) {
-    std::ifstream file(file_path);
-    if (!file.is_open()) {
-        std::cerr << "Error: No se pudo abrir el archivo para cargar la calibración." << std::endl;
-        return -1;
-    }
-
-    std::string line;
-    // Saltar la primera línea (encabezado)
-    std::getline(file, line);
-
-    while (std::getline(file, line)) {
-        std::stringstream ss(line);
-        std::string sensor, bias_str, scale_str;
-
-        // Leer columnas
-        if (std::getline(ss, sensor, ',') && std::getline(ss, bias_str, ',') && std::getline(ss, scale_str, ',')) {
-            try {
-                // Limpiar cadenas
-                sensor = trim(sensor);
-                bias_str = trim(bias_str);
-                scale_str = trim(scale_str);
-
-                // Convertir a float
-                size_t idx1 = 0, idx2 = 0;
-                float bias = std::stof(bias_str, &idx1);
-                float scale = std::stof(scale_str, &idx2);
-
-                if (idx1 != bias_str.size() || idx2 != scale_str.size()) {
-                    std::cerr << "Error: Valor no numérico en línea: " << line << std::endl;
-                    continue;
-                }
-
-                // Asignar valores
-                if (sensor == "Gyro_X") {
-                    setGyroBiasX_rads(bias);
-                } else if (sensor == "Gyro_Y") {
-                    setGyroBiasY_rads(bias);
-                } else if (sensor == "Gyro_Z") {
-                    setGyroBiasZ_rads(bias);
-                }
-                // } else if (sensor == "Accel_X") {
-                //     _axb = bias;
-                //     _axs = scale;
-                // } else if (sensor == "Accel_Y") {
-                //     _ayb = bias;
-                //     _ays = scale;
-                // } else if (sensor == "Accel_Z") {
-                //     _azb = bias;
-                //     _azs = scale;
-                // } else if (sensor == "Mag_X") {
-                //     _hxb = bias;
-                //     _hxs = scale;
-                // } else if (sensor == "Mag_Y") {
-                //     _hyb = bias;
-                //     _hys = scale;
-                // } else if (sensor == "Mag_Z") {
-                //     _hzb = bias;
-                //     _hzs = scale;
-                // }
-            } catch (const std::invalid_argument& e) {
-                std::cerr << "Error: Valor no válido en línea: " << line << std::endl;
-                continue;
-            } catch (const std::out_of_range& e) {
-                std::cerr << "Error: Valor fuera de rango en línea: " << line << std::endl;
-                continue;
-            }
-        } else {
-            std::cerr << "Error: Formato de línea no válido: " << line << std::endl;
-        }
-    }
-
-    file.close();
-    return 1;
-}
-
-
-
-/*
-MPU9250.cpp
-Brian R Taylor
-brian.taylor@bolderflight.com
-
-Copyright (c) 2017 Bolder Flight Systems
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
-and associated documentation files (the "Software"), to deal in the Software without restriction, 
-including without limitation the rights to use, copy, modify, merge, publish, distribute, 
-sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or 
-substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING 
-BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
-DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-
-/* MPU9250 object, input the I2C bus and address */
+/* mpu9250 constructor */
 MPU9250::MPU9250(){
     _address = 0x68; // I2C address
     _useSPI = false; // set to use I2C
@@ -327,6 +163,148 @@ int MPU9250::begin(){
     }
  */
     // successful init, return 1
+    return 1;
+}
+
+/* writes a byte to MPU9250 register given a register address and data */
+int MPU9250::writeRegister(uint8_t subAddress, uint8_t data){
+
+    writeByte(_address, subAddress, data);
+
+    delay(10); 
+
+    /* read back the register */
+    readRegisters(subAddress, 1, _buffer);
+    /* check the read back register against the written register */
+
+    if(_buffer[0] == data) {
+        return 1;
+    }
+    else{
+        return -1;
+    }
+}
+
+/* reads registers from MPU9250 given a starting register address, number of bytes, and a pointer to store data */
+int MPU9250::readRegisters(uint8_t subAddress, uint8_t count, uint8_t* dest){
+    if ( count == readBytes(_address, subAddress, count, dest)){
+        return 0;
+    }
+    else {
+        return -1;
+    }
+
+}
+
+/* calibrate gyro */
+void MPU9250::calibrate() {
+    this->calibrateGyro(10);
+}
+
+/* calibrate gyro and save calibration data for later use */
+void MPU9250::calibrate(std::string calibration_output_filename) {
+    std::cout << "Inicio proceso de calibracion (10 segundos). MANTENGA AL SENSOR PLANO Y QUIETO\n";
+    
+    this->calibrateGyro(10);
+    this->saveCalibration(calibration_output_filename);
+
+    std::cout << "Fin Calibracion.\n";
+}
+  
+/* saves the calibration data in a .txt file */
+int MPU9250::saveCalibration(std::string path_to_save_calibration_output) {
+    Writer writer(path_to_save_calibration_output, "Sensor,Bias,Scale");
+    writer.write_row({"Samples for Gyro: ", std::to_string(_gyroNumSamples)});
+    writer.write_row({"Gyro_Bias_X", std::to_string(getGyroBiasX_rads()), "1.0"});
+    writer.write_row({"Gyro_Bias_Y", std::to_string(getGyroBiasY_rads()), "1.0"});
+    writer.write_row({"Gyro_Bias_Z", std::to_string(getGyroBiasZ_rads()), "1.0"});
+
+    // writer.write_row({"Accel_X", std::to_string(_axb), std::to_string(_axs)});
+    // writer.write_row({"Accel_Y", std::to_string(_ayb), std::to_string(_ays)});
+    // writer.write_row({"Accel_Z", std::to_string(_azb), std::to_string(_azs)});
+
+    // writer.write_row({"Mag_X", std::to_string(_hxb), std::to_string(_hxs)});
+    // writer.write_row({"Mag_Y", std::to_string(_hyb), std::to_string(_hys)});
+    // writer.write_row({"Mag_Z", std::to_string(_hzb), std::to_string(_hzs)});
+
+    writer.close();
+    return 1;
+}
+
+/* calibrate mpu from a data file */
+int MPU9250::loadCalibration(std::string file_path) {
+    std::ifstream file(file_path);
+    if (!file.is_open()) {
+        std::cerr << "Error: No se pudo abrir el archivo para cargar la calibración." << std::endl;
+        return -1;
+    }
+
+    std::string line;
+    // Saltar la primera línea (encabezado)
+    std::getline(file, line);
+
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string sensor, bias_str, scale_str;
+
+        // Leer columnas
+        if (std::getline(ss, sensor, ',') && std::getline(ss, bias_str, ',') && std::getline(ss, scale_str, ',')) {
+            try {
+                // Limpiar cadenas
+                sensor = trim(sensor);
+                bias_str = trim(bias_str);
+                scale_str = trim(scale_str);
+
+                // Convertir a float
+                size_t idx1 = 0, idx2 = 0;
+                float bias = std::stof(bias_str, &idx1);
+                float scale = std::stof(scale_str, &idx2);
+
+                if (idx1 != bias_str.size() || idx2 != scale_str.size()) {
+                    std::cerr << "Error: Valor no numérico en línea: " << line << std::endl;
+                    continue;
+                }
+
+                // Asignar valores
+                if (sensor == "Gyro_X") {
+                    setGyroBiasX_rads(bias);
+                } else if (sensor == "Gyro_Y") {
+                    setGyroBiasY_rads(bias);
+                } else if (sensor == "Gyro_Z") {
+                    setGyroBiasZ_rads(bias);
+                }
+                // } else if (sensor == "Accel_X") {
+                //     _axb = bias;
+                //     _axs = scale;
+                // } else if (sensor == "Accel_Y") {
+                //     _ayb = bias;
+                //     _ays = scale;
+                // } else if (sensor == "Accel_Z") {
+                //     _azb = bias;
+                //     _azs = scale;
+                // } else if (sensor == "Mag_X") {
+                //     _hxb = bias;
+                //     _hxs = scale;
+                // } else if (sensor == "Mag_Y") {
+                //     _hyb = bias;
+                //     _hys = scale;
+                // } else if (sensor == "Mag_Z") {
+                //     _hzb = bias;
+                //     _hzs = scale;
+                // }
+            } catch (const std::invalid_argument& e) {
+                std::cerr << "Error: Valor no válido en línea: " << line << std::endl;
+                continue;
+            } catch (const std::out_of_range& e) {
+                std::cerr << "Error: Valor fuera de rango en línea: " << line << std::endl;
+                continue;
+            }
+        } else {
+            std::cerr << "Error: Formato de línea no válido: " << line << std::endl;
+        }
+    }
+
+    file.close();
     return 1;
 }
 
@@ -588,24 +566,6 @@ int MPU9250::enableWakeOnMotion(float womThresh_mg,LpAccelOdr odr) {
     return 1;
 }
 
-/* configures and enables the FIFO buffer  */
-int MPU9250FIFO::enableFifo(bool accel,bool gyro,bool mag,bool temp) {
-    // use low speed SPI for register setting
-    _useSPIHS = false;
-    if(writeRegister(USER_CTRL, (0x40 | I2C_MST_EN)) < 0){
-        return -1;
-    }
-    if(writeRegister(FIFO_EN,(accel*FIFO_ACCEL)|(gyro*FIFO_GYRO)|(mag*FIFO_MAG)|(temp*FIFO_TEMP)) < 0){
-        return -2;
-    }
-    _enFifoAccel = accel;
-    _enFifoGyro = gyro;
-    _enFifoMag = mag;
-    _enFifoTemp = temp;
-    _fifoFrameSize = accel*6 + gyro*6 + mag*7 + temp*2;
-    return 1;
-}
-
 /* reads the most current data from MPU9250 and stores in buffer */
 int MPU9250::readSensor() {
     _useSPIHS = true; // use the high speed SPI for data readout
@@ -711,121 +671,9 @@ float MPU9250::getTemperature_C() {
     return _t;
 }
 
-/* reads data from the MPU9250 FIFO and stores in buffer */
-int MPU9250FIFO::readFifo() {
-    _useSPIHS = true; // use the high speed SPI for data readout
-    // get the fifo size
-    readRegisters(FIFO_COUNT, 2, _buffer);
-    _fifoSize = (((uint16_t) (_buffer[0]&0x0F)) <<8) + (((uint16_t) _buffer[1]));
-    // read and parse the buffer
-    for (size_t i=0; i < _fifoSize/_fifoFrameSize; i++) {
-        // grab the data from the MPU9250
-        if (readRegisters(FIFO_READ,_fifoFrameSize,_buffer) < 0) {
-            return -1;
-        }
-        if (_enFifoAccel) {
-            // combine into 16 bit values
-            _axcounts = (((int16_t)_buffer[0]) << 8) | _buffer[1];
-            _aycounts = (((int16_t)_buffer[2]) << 8) | _buffer[3];
-            _azcounts = (((int16_t)_buffer[4]) << 8) | _buffer[5];
-            // transform and convert to float values
-            _axFifo[i] = (((float)(tX[0]*_axcounts + tX[1]*_aycounts + tX[2]*_azcounts) * _accelScale)-_axb)*_axs;
-            _ayFifo[i] = (((float)(tY[0]*_axcounts + tY[1]*_aycounts + tY[2]*_azcounts) * _accelScale)-_ayb)*_ays;
-            _azFifo[i] = (((float)(tZ[0]*_axcounts + tZ[1]*_aycounts + tZ[2]*_azcounts) * _accelScale)-_azb)*_azs;
-            _aSize = _fifoSize/_fifoFrameSize;
-        }
-        if (_enFifoTemp) {
-            // combine into 16 bit values
-            _tcounts = (((int16_t)_buffer[0 + _enFifoAccel*6]) << 8) | _buffer[1 + _enFifoAccel*6];
-            // transform and convert to float values
-            _tFifo[i] = ((((float) _tcounts) - _tempOffset)/_tempScale) + _tempOffset;
-            _tSize = _fifoSize/_fifoFrameSize;
-        }
-        if (_enFifoGyro) {
-            // combine into 16 bit values
-            _gxcounts = (((int16_t)_buffer[0 + _enFifoAccel*6 + _enFifoTemp*2]) << 8) | _buffer[1 + _enFifoAccel*6 + _enFifoTemp*2];
-            _gycounts = (((int16_t)_buffer[2 + _enFifoAccel*6 + _enFifoTemp*2]) << 8) | _buffer[3 + _enFifoAccel*6 + _enFifoTemp*2];
-            _gzcounts = (((int16_t)_buffer[4 + _enFifoAccel*6 + _enFifoTemp*2]) << 8) | _buffer[5 + _enFifoAccel*6 + _enFifoTemp*2];
-            // transform and convert to float values
-            _gxFifo[i] = ((float)(tX[0]*_gxcounts + tX[1]*_gycounts + tX[2]*_gzcounts) * _gyroScale) - _gxb;
-            _gyFifo[i] = ((float)(tY[0]*_gxcounts + tY[1]*_gycounts + tY[2]*_gzcounts) * _gyroScale) - _gyb;
-            _gzFifo[i] = ((float)(tZ[0]*_gxcounts + tZ[1]*_gycounts + tZ[2]*_gzcounts) * _gyroScale) - _gzb;
-            _gSize = _fifoSize/_fifoFrameSize;
-        }
-        if (_enFifoMag) {
-            // combine into 16 bit values
-            _hxcounts = (((int16_t)_buffer[1 + _enFifoAccel*6 + _enFifoTemp*2 + _enFifoGyro*6]) << 8) | _buffer[0 + _enFifoAccel*6 + _enFifoTemp*2 + _enFifoGyro*6];
-            _hycounts = (((int16_t)_buffer[3 + _enFifoAccel*6 + _enFifoTemp*2 + _enFifoGyro*6]) << 8) | _buffer[2 + _enFifoAccel*6 + _enFifoTemp*2 + _enFifoGyro*6];
-            _hzcounts = (((int16_t)_buffer[5 + _enFifoAccel*6 + _enFifoTemp*2 + _enFifoGyro*6]) << 8) | _buffer[4 + _enFifoAccel*6 + _enFifoTemp*2 + _enFifoGyro*6];
-            // transform and convert to float values
-            _hxFifo[i] = (((float)(_hxcounts) * _magScaleX) - _hxb)*_hxs;
-            _hyFifo[i] = (((float)(_hycounts) * _magScaleY) - _hyb)*_hys;
-            _hzFifo[i] = (((float)(_hzcounts) * _magScaleZ) - _hzb)*_hzs;
-            _hSize = _fifoSize/_fifoFrameSize;
-        }
-    }
-    return 1;
-}
 
-/* returns the accelerometer FIFO size and data in the x direction, m/s/s */
-void MPU9250FIFO::getFifoAccelX_mss(size_t *size,float* data) {
-    *size = _aSize;
-    memcpy(data,_axFifo,_aSize*sizeof(float));
-}
 
-/* returns the accelerometer FIFO size and data in the y direction, m/s/s */
-void MPU9250FIFO::getFifoAccelY_mss(size_t *size,float* data) {
-    *size = _aSize;
-    memcpy(data,_ayFifo,_aSize*sizeof(float));
-}
-
-/* returns the accelerometer FIFO size and data in the z direction, m/s/s */
-void MPU9250FIFO::getFifoAccelZ_mss(size_t *size,float* data) {
-    *size = _aSize;
-    memcpy(data,_azFifo,_aSize*sizeof(float));
-}
-
-/* returns the gyroscope FIFO size and data in the x direction, rad/s */
-void MPU9250FIFO::getFifoGyroX_rads(size_t *size,float* data) {
-    *size = _gSize;
-    memcpy(data,_gxFifo,_gSize*sizeof(float));
-}
-
-/* returns the gyroscope FIFO size and data in the y direction, rad/s */
-void MPU9250FIFO::getFifoGyroY_rads(size_t *size,float* data) {
-    *size = _gSize;
-    memcpy(data,_gyFifo,_gSize*sizeof(float));
-}
-
-/* returns the gyroscope FIFO size and data in the z direction, rad/s */
-void MPU9250FIFO::getFifoGyroZ_rads(size_t *size,float* data) {
-    *size = _gSize;
-    memcpy(data,_gzFifo,_gSize*sizeof(float));
-}
-
-/* returns the magnetometer FIFO size and data in the x direction, uT */
-void MPU9250FIFO::getFifoMagX_uT(size_t *size,float* data) {
-    *size = _hSize;
-    memcpy(data,_hxFifo,_hSize*sizeof(float));
-}
-
-/* returns the magnetometer FIFO size and data in the y direction, uT */
-void MPU9250FIFO::getFifoMagY_uT(size_t *size,float* data) {
-    *size = _hSize;
-    memcpy(data,_hyFifo,_hSize*sizeof(float));
-}
-
-/* returns the magnetometer FIFO size and data in the z direction, uT */
-void MPU9250FIFO::getFifoMagZ_uT(size_t *size,float* data) {
-    *size = _hSize;
-    memcpy(data,_hzFifo,_hSize*sizeof(float));
-}
-
-/* returns the die temperature FIFO size and data, C */
-void MPU9250FIFO::getFifoTemperature_C(size_t *size,float* data) {
-    *size = _tSize;
-    memcpy(data,_tFifo,_tSize*sizeof(float));
-}
+// GYRO STUFF
 
 /* estimates the gyro biases */
 int MPU9250::calibrateGyro(int durationSeconds) {
@@ -911,6 +759,9 @@ void MPU9250::setGyroBiasY_rads(float bias) {
 void MPU9250::setGyroBiasZ_rads(float bias) {
     _gzb = bias;
 }
+
+
+// GYRO STUFF
 
 /* finds bias and scale factor calibration for the accelerometer,
 this should be run for each axis in each direction (6 total) to find
@@ -1034,6 +885,9 @@ void MPU9250::setAccelCalZ(float bias,float scaleFactor) {
     _azb = bias;
     _azs = scaleFactor;
 }
+
+
+// MAG STUFF
 
 /* finds bias and scale factor calibration for the magnetometer,
 the sensor should be rotated in a figure 8 motion until complete */
@@ -1257,6 +1111,139 @@ int MPU9250::readAK8963Registers(uint8_t subAddress, uint8_t count, uint8_t* des
     return _status;
 }
 
+/* configures and enables the FIFO buffer  */
+int MPU9250FIFO::enableFifo(bool accel,bool gyro,bool mag,bool temp) {
+    // use low speed SPI for register setting
+    _useSPIHS = false;
+    if(writeRegister(USER_CTRL, (0x40 | I2C_MST_EN)) < 0){
+        return -1;
+    }
+    if(writeRegister(FIFO_EN,(accel*FIFO_ACCEL)|(gyro*FIFO_GYRO)|(mag*FIFO_MAG)|(temp*FIFO_TEMP)) < 0){
+        return -2;
+    }
+    _enFifoAccel = accel;
+    _enFifoGyro = gyro;
+    _enFifoMag = mag;
+    _enFifoTemp = temp;
+    _fifoFrameSize = accel*6 + gyro*6 + mag*7 + temp*2;
+    return 1;
+}
+
+/* reads data from the MPU9250 FIFO and stores in buffer */
+int MPU9250FIFO::readFifo() {
+    _useSPIHS = true; // use the high speed SPI for data readout
+    // get the fifo size
+    readRegisters(FIFO_COUNT, 2, _buffer);
+    _fifoSize = (((uint16_t) (_buffer[0]&0x0F)) <<8) + (((uint16_t) _buffer[1]));
+    // read and parse the buffer
+    for (size_t i=0; i < _fifoSize/_fifoFrameSize; i++) {
+        // grab the data from the MPU9250
+        if (readRegisters(FIFO_READ,_fifoFrameSize,_buffer) < 0) {
+            return -1;
+        }
+        if (_enFifoAccel) {
+            // combine into 16 bit values
+            _axcounts = (((int16_t)_buffer[0]) << 8) | _buffer[1];
+            _aycounts = (((int16_t)_buffer[2]) << 8) | _buffer[3];
+            _azcounts = (((int16_t)_buffer[4]) << 8) | _buffer[5];
+            // transform and convert to float values
+            _axFifo[i] = (((float)(tX[0]*_axcounts + tX[1]*_aycounts + tX[2]*_azcounts) * _accelScale)-_axb)*_axs;
+            _ayFifo[i] = (((float)(tY[0]*_axcounts + tY[1]*_aycounts + tY[2]*_azcounts) * _accelScale)-_ayb)*_ays;
+            _azFifo[i] = (((float)(tZ[0]*_axcounts + tZ[1]*_aycounts + tZ[2]*_azcounts) * _accelScale)-_azb)*_azs;
+            _aSize = _fifoSize/_fifoFrameSize;
+        }
+        if (_enFifoTemp) {
+            // combine into 16 bit values
+            _tcounts = (((int16_t)_buffer[0 + _enFifoAccel*6]) << 8) | _buffer[1 + _enFifoAccel*6];
+            // transform and convert to float values
+            _tFifo[i] = ((((float) _tcounts) - _tempOffset)/_tempScale) + _tempOffset;
+            _tSize = _fifoSize/_fifoFrameSize;
+        }
+        if (_enFifoGyro) {
+            // combine into 16 bit values
+            _gxcounts = (((int16_t)_buffer[0 + _enFifoAccel*6 + _enFifoTemp*2]) << 8) | _buffer[1 + _enFifoAccel*6 + _enFifoTemp*2];
+            _gycounts = (((int16_t)_buffer[2 + _enFifoAccel*6 + _enFifoTemp*2]) << 8) | _buffer[3 + _enFifoAccel*6 + _enFifoTemp*2];
+            _gzcounts = (((int16_t)_buffer[4 + _enFifoAccel*6 + _enFifoTemp*2]) << 8) | _buffer[5 + _enFifoAccel*6 + _enFifoTemp*2];
+            // transform and convert to float values
+            _gxFifo[i] = ((float)(tX[0]*_gxcounts + tX[1]*_gycounts + tX[2]*_gzcounts) * _gyroScale) - _gxb;
+            _gyFifo[i] = ((float)(tY[0]*_gxcounts + tY[1]*_gycounts + tY[2]*_gzcounts) * _gyroScale) - _gyb;
+            _gzFifo[i] = ((float)(tZ[0]*_gxcounts + tZ[1]*_gycounts + tZ[2]*_gzcounts) * _gyroScale) - _gzb;
+            _gSize = _fifoSize/_fifoFrameSize;
+        }
+        if (_enFifoMag) {
+            // combine into 16 bit values
+            _hxcounts = (((int16_t)_buffer[1 + _enFifoAccel*6 + _enFifoTemp*2 + _enFifoGyro*6]) << 8) | _buffer[0 + _enFifoAccel*6 + _enFifoTemp*2 + _enFifoGyro*6];
+            _hycounts = (((int16_t)_buffer[3 + _enFifoAccel*6 + _enFifoTemp*2 + _enFifoGyro*6]) << 8) | _buffer[2 + _enFifoAccel*6 + _enFifoTemp*2 + _enFifoGyro*6];
+            _hzcounts = (((int16_t)_buffer[5 + _enFifoAccel*6 + _enFifoTemp*2 + _enFifoGyro*6]) << 8) | _buffer[4 + _enFifoAccel*6 + _enFifoTemp*2 + _enFifoGyro*6];
+            // transform and convert to float values
+            _hxFifo[i] = (((float)(_hxcounts) * _magScaleX) - _hxb)*_hxs;
+            _hyFifo[i] = (((float)(_hycounts) * _magScaleY) - _hyb)*_hys;
+            _hzFifo[i] = (((float)(_hzcounts) * _magScaleZ) - _hzb)*_hzs;
+            _hSize = _fifoSize/_fifoFrameSize;
+        }
+    }
+    return 1;
+}
+
+/* returns the accelerometer FIFO size and data in the x direction, m/s/s */
+void MPU9250FIFO::getFifoAccelX_mss(size_t *size,float* data) {
+    *size = _aSize;
+    memcpy(data,_axFifo,_aSize*sizeof(float));
+}
+
+/* returns the accelerometer FIFO size and data in the y direction, m/s/s */
+void MPU9250FIFO::getFifoAccelY_mss(size_t *size,float* data) {
+    *size = _aSize;
+    memcpy(data,_ayFifo,_aSize*sizeof(float));
+}
+
+/* returns the accelerometer FIFO size and data in the z direction, m/s/s */
+void MPU9250FIFO::getFifoAccelZ_mss(size_t *size,float* data) {
+    *size = _aSize;
+    memcpy(data,_azFifo,_aSize*sizeof(float));
+}
+
+/* returns the gyroscope FIFO size and data in the x direction, rad/s */
+void MPU9250FIFO::getFifoGyroX_rads(size_t *size,float* data) {
+    *size = _gSize;
+    memcpy(data,_gxFifo,_gSize*sizeof(float));
+}
+
+/* returns the gyroscope FIFO size and data in the y direction, rad/s */
+void MPU9250FIFO::getFifoGyroY_rads(size_t *size,float* data) {
+    *size = _gSize;
+    memcpy(data,_gyFifo,_gSize*sizeof(float));
+}
+
+/* returns the gyroscope FIFO size and data in the z direction, rad/s */
+void MPU9250FIFO::getFifoGyroZ_rads(size_t *size,float* data) {
+    *size = _gSize;
+    memcpy(data,_gzFifo,_gSize*sizeof(float));
+}
+
+/* returns the magnetometer FIFO size and data in the x direction, uT */
+void MPU9250FIFO::getFifoMagX_uT(size_t *size,float* data) {
+    *size = _hSize;
+    memcpy(data,_hxFifo,_hSize*sizeof(float));
+}
+
+/* returns the magnetometer FIFO size and data in the y direction, uT */
+void MPU9250FIFO::getFifoMagY_uT(size_t *size,float* data) {
+    *size = _hSize;
+    memcpy(data,_hyFifo,_hSize*sizeof(float));
+}
+
+/* returns the magnetometer FIFO size and data in the z direction, uT */
+void MPU9250FIFO::getFifoMagZ_uT(size_t *size,float* data) {
+    *size = _hSize;
+    memcpy(data,_hzFifo,_hSize*sizeof(float));
+}
+
+/* returns the die temperature FIFO size and data, C */
+void MPU9250FIFO::getFifoTemperature_C(size_t *size,float* data) {
+    *size = _tSize;
+    memcpy(data,_tFifo,_tSize*sizeof(float));
+}
 
 
 
