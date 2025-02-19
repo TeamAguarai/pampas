@@ -9,7 +9,8 @@ Creditos: https://github.com/ranranff/mpu9250/
     #include "operations.h"
     #include "I2Cdev.h"
 #endif
-
+    
+#include <cmath>
 
 /*
 MPU9250.h
@@ -96,12 +97,12 @@ public:
         LP_ACCEL_ODR_500HZ = 11
     };
     MPU9250();
+    int begin();
 
     void calibrate(); // calibrar para uso unico sin guardar los datos en memoria
     void calibrate(std::string calibration_output_filename); // calibrar para uso unico y guardar los datos en un archivo
     int loadCalibration(std::string file_path); 
     
-    int begin();
     int setAccelRange(AccelRange range);
     int setGyroRange(GyroRange range);
     int setDlpfBandwidth(DlpfBandwidth bandwidth);
@@ -152,8 +153,16 @@ public:
     void setMagCalY(float bias,float scaleFactor);
     void setMagCalZ(float bias,float scaleFactor);
 
-
+    int updateAngles();
+    float getThetaX();
+    float getThetaY();
 protected:
+    // pitch and roll
+    struct timespec gyro_current_time;
+    struct timespec gyro_prev_time;  // Guardar el tiempo anterior
+    float theta_x = 0.0;  // Ángulo en X inicial
+    float theta_y = 0.0;  // Ángulo en Y inicial
+
     int saveCalibration(std::string path_to_save_calibration_output);
     // i2c
     uint8_t _address = 0x00;

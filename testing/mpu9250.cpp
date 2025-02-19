@@ -41,16 +41,7 @@ int main() {
         return -1;
     }
 
-
-    std::cout << "Gyro Bias X (rad/s): " << IMU.getGyroBiasX_rads() << std::endl;
-    std::cout << "Gyro Bias Y (rad/s): " << IMU.getGyroBiasY_rads() << std::endl;
-    std::cout << "Gyro Bias Z (rad/s): " << IMU.getGyroBiasZ_rads() << std::endl;
-
-    IMU.calibrate("./calib.txt");
-
-    std::cout << "Gyro Bias X (rad/s): " << IMU.getGyroBiasX_rads() << std::endl;
-    std::cout << "Gyro Bias Y (rad/s): " << IMU.getGyroBiasY_rads() << std::endl;
-    std::cout << "Gyro Bias Z (rad/s): " << IMU.getGyroBiasZ_rads() << std::endl;
+    IMU.calibrate();
 
     // std::cout << "Mag Bias X (µT): " << IMU.getMagBiasX_uT() << std::endl;
     // std::cout << "Mag Scale Factor X: " << IMU.getMagScaleFactorX() << std::endl;
@@ -80,18 +71,21 @@ int main() {
     int c = 0;
     while (true) {
         IMU.readSensor();
-
-    //     std::cout << "\n\nLectura [" << c << "]: " << std::endl;
-    //     c++;
+        IMU.updateAngles();
+        c++;
+        std::cout << "\n\nLectura [" << c << "]: " << std::endl;
     //     std::cout << "📌 Datos del Acelerómetro (m/s²):" << std::endl;
     //     std::cout << "  ➤ X: " << IMU.getAccelX_mss() << " m/s²" << std::endl;
     //     std::cout << "  ➤ Y: " << IMU.getAccelY_mss() << " m/s²" << std::endl;
     //     std::cout << "  ➤ Z: " << IMU.getAccelZ_mss() << " m/s²" << std::endl;
 
         std::cout << "\n📌 Datos del Giroscopio (rad/s):" << std::endl;
-        std::cout << "  ➤ X: " << std::ceil(IMU.getGyroX_rads() * 100.0) / 100.0 << " rad/s" << std::endl;
-        std::cout << "  ➤ Y: " << std::ceil(IMU.getGyroY_rads() * 100.0) / 100.0 << " rad/s" << std::endl;
-        std::cout << "  ➤ Z: " << std::ceil(IMU.getGyroZ_rads() * 100.0) / 100.0 << " rad/s" << std::endl;
+        std::cout << "  ➤ X: " << IMU.getGyroX_rads()  << " rad/s" << std::endl;
+        std::cout << "  ➤ Y: " << IMU.getGyroY_rads()  << " rad/s" << std::endl;
+        std::cout << "  ➤ Z: " << IMU.getGyroZ_rads()  << " rad/s" << std::endl;
+        std::cout << "  ➤ Angle X axis: " << IMU.getThetaX() << "°" << std::endl;
+        std::cout << "  ➤ Angle Y axis: " << IMU.getThetaY() << "°" << std::endl;
+
 
 
         pampas::delay(300); // Esperar 500 ms entre lecturas

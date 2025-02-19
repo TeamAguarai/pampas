@@ -2,9 +2,6 @@
 #include "MPU9250.h"
 #endif
 
-#include <algorithm>
-#include <cctype>
-
 namespace pampas
 {
 
@@ -144,6 +141,9 @@ int MPU9250::begin(){
     }
     // instruct the MPU9250 to get 7 bytes of data from the AK8963 at the sample rate
     readAK8963Registers(AK8963_HXL,7,_buffer);
+
+    // start gyro clock for angle measurement
+    clock_gettime(CLOCK_REALTIME, &gyro_prev_time);
 
     // estimate gyro bias
     // if (calibrateGyro() < 0) {
@@ -636,19 +636,19 @@ float MPU9250::getAccelZ_mss() {
     return _az;
 }
 
-/* returns the gyroscope measurement in the x direction, rad/s */
+/* returns the gyroscope measurement in the x direction, rad/s 2 points decimal presition */
 float MPU9250::getGyroX_rads() {
-    return _gx;
+    return std::ceil(_gx * 100.0) / 100.0;
 }
 
-/* returns the gyroscope measurement in the y direction, rad/s */
+/* returns the gyroscope measurement in the y direction, rad/s 2 points decimal presition */
 float MPU9250::getGyroY_rads() {
-    return _gy;
+    return std::ceil(_gy * 100.0) / 100.0;
 }
 
-/* returns the gyroscope measurement in the z direction, rad/s */
+/* returns the gyroscope measurement in the z direction, rad/s 2 points decimal presition */
 float MPU9250::getGyroZ_rads() {
-    return _gz;
+    return std::ceil(_gz * 100.0) / 100.0;
 }
 
 /* returns the magnetometer measurement in the x direction, uT */
@@ -1110,6 +1110,35 @@ int MPU9250::readAK8963Registers(uint8_t subAddress, uint8_t count, uint8_t* des
     _status = readRegisters(EXT_SENS_DATA_00,count,dest);
     return _status;
 }
+
+/* calculates pitch and roll */
+int MPU9250::updateAngles() {
+
+    // Obtener tiempo transcurrido en segundos (dt)
+    clock_gettime(CLOCK_REALTIME, &gyro_current_time);
+    float dt = (gyro_current_time.tv_sec - gyro_prev_time.tv_sec) + 
+               (gyro_current_time.tv_nsec - gyro_prev_time.tv_nsec) / 1e9;
+    
+    // Actualizar ángulos usando la integración
+    this->theta_x += getGyroX_rads() * dt;
+    this->theta_y += getGyroY_rads() * dt;
+
+    // Guardar el tiempo actual como referencia para la siguiente iteración
+    gyro_prev_time = gyro_current_time;
+
+    return 1;
+}
+
+/* returns angle made from X axis */
+float MPU9250::getThetaX() {
+    return this->theta_x * (180.0 / M_PI);
+}
+
+/* returns angle made from Y axis */
+float MPU9250::getThetaY() {
+    return this->theta_y * (180.0 / M_PI);
+}
+
 
 /* configures and enables the FIFO buffer  */
 int MPU9250FIFO::enableFifo(bool accel,bool gyro,bool mag,bool temp) {
