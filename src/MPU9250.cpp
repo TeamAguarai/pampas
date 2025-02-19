@@ -35,6 +35,10 @@ MPU9250::MPU9250(){
     _hxb = 0.0f;
     _hyb = 0.0f;
     _hzb = 0.0f;
+
+    _gyroOutputFilters[0].setAlpha(_gyroFiltersAlpha);
+    _gyroOutputFilters[1].setAlpha(_gyroFiltersAlpha);
+    _gyroOutputFilters[2].setAlpha(_gyroFiltersAlpha);
 }
 
 /* starts communication with the MPU-9250 */
@@ -124,7 +128,7 @@ int MPU9250::begin(){
     _magScaleX = ((((float)_buffer[0]) - 128.0f)/(256.0f) + 1.0f) * 4912.0f / 32760.0f; // micro Tesla
     _magScaleY = ((((float)_buffer[1]) - 128.0f)/(256.0f) + 1.0f) * 4912.0f / 32760.0f; // micro Tesla
     _magScaleZ = ((((float)_buffer[2]) - 128.0f)/(256.0f) + 1.0f) * 4912.0f / 32760.0f; // micro Tesla
-    std::cout<<__FILE__<<__LINE__<<"  "<<_magScaleX<<"\t"<<_magScaleY<<"\t"<<_magScaleZ<<"\n";
+    // std::cout<<__FILE__<<__LINE__<<"  "<<_magScaleX<<"\t"<<_magScaleY<<"\t"<<_magScaleZ<<"\n";
     // set AK8963 to Power Down
     if(writeAK8963Register(AK8963_CNTL1,AK8963_PWR_DOWN) < 0){
         return -17;
@@ -143,7 +147,8 @@ int MPU9250::begin(){
     readAK8963Registers(AK8963_HXL,7,_buffer);
 
     // start gyro clock for angle measurement
-    clock_gettime(CLOCK_REALTIME, &gyro_prev_time);
+    clock_gettime(CLOCK_REALTIME, &_gyroPrevTime);
+
 
     // estimate gyro bias
     // if (calibrateGyro() < 0) {
@@ -198,7 +203,9 @@ int MPU9250::readRegisters(uint8_t subAddress, uint8_t count, uint8_t* dest){
 
 /* calibrate gyro */
 void MPU9250::calibrate() {
+    std::cout << "Inicio proceso de calibracion (10 segundos). MANTENGA AL SENSOR PLANO Y QUIETO\n";
     this->calibrateGyro(10);
+    std::cout << "Fin Calibracion.\n";
 }
 
 /* calibrate gyro and save calibration data for later use */
@@ -637,18 +644,21 @@ float MPU9250::getAccelZ_mss() {
 }
 
 /* returns the gyroscope measurement in the x direction, rad/s 2 points decimal presition */
-float MPU9250::getGyroX_rads() {
-    return std::ceil(_gx * 100.0) / 100.0;
+float MPU9250::getGyroX_rads(bool filter) {
+    if (filter) return pampas::round(_gyroOutputFilters[0].filter(_gx), 2);
+    return pampas::round(_gx, 2);
 }
 
 /* returns the gyroscope measurement in the y direction, rad/s 2 points decimal presition */
-float MPU9250::getGyroY_rads() {
-    return std::ceil(_gy * 100.0) / 100.0;
+float MPU9250::getGyroY_rads(bool filter) {
+    if (filter) return pampas::round(_gyroOutputFilters[1].filter(_gy), 2);
+    return pampas::round(_gy, 2);
 }
 
 /* returns the gyroscope measurement in the z direction, rad/s 2 points decimal presition */
-float MPU9250::getGyroZ_rads() {
-    return std::ceil(_gz * 100.0) / 100.0;
+float MPU9250::getGyroZ_rads(bool filter) {
+    if (filter) return pampas::round(_gyroOutputFilters[2].filter(_gz), 2);
+    return pampas::round(_gz, 2);
 }
 
 /* returns the magnetometer measurement in the x direction, uT */
@@ -1115,28 +1125,28 @@ int MPU9250::readAK8963Registers(uint8_t subAddress, uint8_t count, uint8_t* des
 int MPU9250::updateAngles() {
 
     // Obtener tiempo transcurrido en segundos (dt)
-    clock_gettime(CLOCK_REALTIME, &gyro_current_time);
-    float dt = (gyro_current_time.tv_sec - gyro_prev_time.tv_sec) + 
-               (gyro_current_time.tv_nsec - gyro_prev_time.tv_nsec) / 1e9;
+    clock_gettime(CLOCK_REALTIME, &_gyroCurrentTime);
+    float dt = (_gyroCurrentTime.tv_sec - _gyroPrevTime.tv_sec) + 
+               (_gyroCurrentTime.tv_nsec - _gyroPrevTime.tv_nsec) / 1e9;
     
     // Actualizar ángulos usando la integración
-    this->theta_x += getGyroX_rads() * dt;
-    this->theta_y += getGyroY_rads() * dt;
+    this->_thetaX += getGyroX_rads(true) * dt;
+    this->_thetaY += getGyroY_rads(true) * dt;
 
     // Guardar el tiempo actual como referencia para la siguiente iteración
-    gyro_prev_time = gyro_current_time;
+    _gyroPrevTime = _gyroCurrentTime;
 
     return 1;
 }
 
 /* returns angle made from X axis */
 float MPU9250::getThetaX() {
-    return this->theta_x * (180.0 / M_PI);
+    return pampas::round(this->_thetaX * (180.0 / M_PI), 2);
 }
 
 /* returns angle made from Y axis */
 float MPU9250::getThetaY() {
-    return this->theta_y * (180.0 / M_PI);
+    return pampas::round(this->_thetaY * (180.0 / M_PI), 2);
 }
 
 

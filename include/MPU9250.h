@@ -8,6 +8,7 @@ Creditos: https://github.com/ranranff/mpu9250/
     #include "Writer.h"
     #include "operations.h"
     #include "I2Cdev.h"
+    #include "LowPass.h"
 #endif
     
 #include <cmath>
@@ -115,9 +116,9 @@ public:
     float getAccelX_mss();
     float getAccelY_mss();
     float getAccelZ_mss();
-    float getGyroX_rads();
-    float getGyroY_rads();
-    float getGyroZ_rads();
+    float getGyroX_rads(bool filter = false);
+    float getGyroY_rads(bool filter = false);
+    float getGyroZ_rads(bool filter = false);
     float getMagX_uT();
     float getMagY_uT();
     float getMagZ_uT();
@@ -158,10 +159,12 @@ public:
     float getThetaY();
 protected:
     // pitch and roll
-    struct timespec gyro_current_time;
-    struct timespec gyro_prev_time;  // Guardar el tiempo anterior
-    float theta_x = 0.0;  // Ángulo en X inicial
-    float theta_y = 0.0;  // Ángulo en Y inicial
+    float _gyroFiltersAlpha = 0.85f;
+    LowPass<float> _gyroOutputFilters[3]; // one for each axis (x,y,z)
+    struct timespec _gyroCurrentTime;
+    struct timespec _gyroPrevTime;  // Guardar el tiempo anterior
+    float _thetaX = 0.0;  // Ángulo en X inicial
+    float _thetaY = 0.0;  // Ángulo en Y inicial
 
     int saveCalibration(std::string path_to_save_calibration_output);
     // i2c
