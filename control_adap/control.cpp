@@ -23,7 +23,7 @@ double polinomialRegression(double x) {
 int main() {
 
     pampas::Drive drive;
-    drive.setPid(0.009, 0, 0.0000013, 0, -10, 3, -8, 8);
+    drive.setPid(0.4369, 0.6735, 0, 0, -10, 3, -8, 8);
     drive.setTransferFunction(polinomialRegression);
     drive.setMotor(18, 1.5, 1.5, 1.7);
     drive.setVelocimeter(17, 0.105, 1.0f);

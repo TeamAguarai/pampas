@@ -7,35 +7,37 @@ namespace pampas {
 
 class PID {
 private:
-    double Kp;     
-    double Ki;     
-    double Kd;     
-    double tau;    
+   
+    double tau_;    
 
-    double minOutput;
-    double maxOutput;
+    double min_output_;
+    double max_output_;
 
-    double minOutputInt;
-    double maxOutputInt;
+    double min_output_int_;
+    double max_output_int_;
 
-    double sampleTime;
+    double sample_time_;
 
-    double integrator = 0;
-    double prevError = 0;
-    double differentiator = 0;
-    double prevMeasurement = 0;
+    double integrator_ = 0;
+    double prev_error_ = 0;
+    double differentiator_ = 0;
+    double prev_measurement_ = 0;
 
-    double out;
+    double out_;
 
-    bool gainsDefined = false;
-    bool paramsDefined = false;
+    bool gains_defined_ = false;
+    bool params_defined_ = false;
 
 public:
+    double kp_;     
+    double ki_;     
+    double kd_;  
 
     PID();
     void setGains(double kp, double ki, double kd);
-    void setParameters(double tau, double minOutput, double maxOutput, double minOutputInt, double maxOutputInt);
-    double calculate(double setpoint, double measurement, double sampleTime);
+    void reset();
+    void setParameters(double tau, double min_output, double max_output, double min_output_int, double max_output_int);
+    double calculate(double setpoint, double measurement, double sample_time);
 };
 
 }

@@ -34,6 +34,7 @@ T LowPass<T>::filter(T input) {
 }
 
 // Instanciaciones explícitas (necesario si se usa fuera del .h)
+
 template class LowPass<double>;
 template class LowPass<float>;
 template class LowPass<int>;

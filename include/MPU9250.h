@@ -133,6 +133,7 @@ public:
     void setGyroBiasZ_rads(float bias);
 
     int calibrateAccel();
+    int calibrateAccel2();
     float getAccelBiasX_mss();
     float getAccelScaleFactorX();
     float getAccelBiasY_mss();
@@ -159,6 +160,7 @@ public:
     float getThetaY();
 protected:
     // pitch and roll
+    bool _gyroTimerStarted = false;
     float _gyroFiltersAlpha = 0.85f;
     LowPass<float> _gyroOutputFilters[3]; // one for each axis (x,y,z)
     struct timespec _gyroCurrentTime;
@@ -223,7 +225,7 @@ protected:
     uint8_t _srd = 0;
 
     // gyro bias estimation
-    size_t _numSamples = 0;
+    size_t _numSamples = 100;
     size_t _gyroNumSamples = 0;
     float _gxbD = 0.0;
     float _gybD = 0.0;

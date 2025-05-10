@@ -1,3 +1,1180 @@
+#include "pampas.h"
+#ifdef USING_VSCODE_AS_EDITOR
+    #include "PulseWidth.h"
+#endif
+
+namespace pampas {
+    
+void PulseWidth::set(double min, double steady, double max) 
+{ 
+    this->min = min; 
+    this->max = max;
+    this->steady = steady; 
+}
+
+bool PulseWidth::isDefined() 
+{
+    if (this->min == -1 || this->max == -1 || this->steady == -1) return false;
+    return true;
+}
+
+double PulseWidth::validate(double pulseWidth) 
+{
+    if (pulseWidth > this->max) return this->max;
+    if (pulseWidth < this->min) return this->min;
+    return pulseWidth;
+}
+
+}
+#ifdef USING_VSCODE_AS_EDITOR
+    #include "gpio.h"
+#endif
+
+
+namespace pampas {
+
+namespace gpio {
+
+    void setupGpioPinout() {
+        ::wiringPiSetupGpio();  
+    }
+
+    void pwmWrite(int pin, double pulseWidthMs) {
+
+        // AGUARAI STEADY STATE
+        if (pulseWidthMs > 2.0) pulseWidthMs = 2.0;
+        else if (pulseWidthMs < 1.0) pulseWidthMs = 1.0;
+
+        
+        // Calculate the range (resolution) and the divisor to adjust the frequency
+        double periodMs = 1000.0 / PWM_FREQUENCY; // Period in milliseconds
+        int range = 1024; // PWM resolution (default in WiringPi)
+        int divisor = static_cast<int>(19200000.0 / (PWM_FREQUENCY * range)); // PWM clock at 19.2 MHz
+
+        // Set the divisor and range
+        ::pwmSetMode(0);      // "Mark-Space" mode for precision
+        ::pwmSetRange(range);           // Set the range for the duty cycle
+        ::pwmSetClock(divisor);         // Set the divisor to adjust the frequency
+
+        // Calculate the duty cycle corresponding to the desired pulse width
+        int dutyCycle = static_cast<int>((pulseWidthMs / periodMs) * range);
+
+        // Set the duty cycle
+        ::pwmWrite(pin, dutyCycle);
+    }
+
+
+    void pinMode(int pin, int mode) {
+        ::pinMode(pin, mode);
+    }
+
+    void digitalWrite(int pin, int value) {
+        ::digitalWrite(pin, value);
+    }
+
+    int digitalRead(int pin) {
+        return ::digitalRead(pin);
+    }
+
+    void onInterrupt (int pin, int edgeType,  void (*function)(void)) {
+        ::wiringPiISR(pin, edgeType, function);
+    }
+
+    void stopOnInterrupt(int pin) {
+        ::wiringPiISRStop(pin); 
+    }
+
+    void reset() // pines pwm a estado estacionario
+    {
+        // pines pwm a estado estacionario
+        ::pinMode(13, 2);
+        ::pwmWrite(13, 1.5);
+
+        ::pinMode(18, 2);
+        ::pwmWrite(18, 1.5);
+        
+    }
+
+}
+
+}
+#ifdef USING_VSCODE_AS_EDITOR
+    #include "Motor.h"
+#endif
+
+
+namespace pampas {
+    
+Motor* motorInstance = nullptr;
+
+Motor::Motor() {
+    motorInstance = this;
+    std::signal(SIGINT, [](int) {
+        motorInstance->cleanup();  
+    });
+}
+
+Motor::~Motor() 
+{
+    this->cleanup();
+}
+
+void Motor::cleanup() 
+{
+    this->setPulseWidth(this->pulseWidth.steady);
+}
+
+void Motor::setPin(int pin) 
+{
+    this->pin = pin;
+    gpio::pinMode(pin, PWM_OUTPUT); // PWM_OUTPUT is a wiringPi constant
+}
+
+void Motor::setPulseWidthRange(double min, double steady, double max) {
+    this->pulseWidth.set(min, steady, max);
+}
+
+void Motor::setPulseWidth(double pulseWidth) 
+{
+    if (this->pulseWidth.isDefined() == false) throw std::invalid_argument( "Faltan definir los valores de ancho de pulso." );
+    if (this->pin == -1) throw std::invalid_argument( "Faltan definir el pin del motor" );
+    gpio::pwmWrite(this->pin, this->pulseWidth.validate(pulseWidth));
+}
+
+
+/* Analizar posible implementacion
+void Motor::runForMilliseconds(int milliseconds, double pulseWidthMs) {
+    std::thread([=]() {
+        this->setPulseWidth(pulseWidthMs); 
+        std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+    }).detach();
+}
+*/
+
+
+}
+#ifdef USING_VSCODE_AS_EDITOR
+    #include "operations.h"
+#endif
+
+namespace pampas {
+
+template <typename T>
+T remap(T value, T in_min, T in_max, T out_min, T out_max) {
+    return out_min + (value - in_min) * (out_max - out_min) / (in_max - in_min);
+}
+
+void delay(int ms) {
+	::delay(ms); // wiringPi function
+}
+
+// Redondeo para float
+float round(float num, int decimals) {
+    float factor = std::pow(10.0f, decimals);
+    return std::round(std::round(num * (factor * 10.0f)) / 10.0f) / factor;
+}
+
+// Redondeo para double
+double round(double num, int decimals) {
+    double factor = std::pow(10.0, decimals);
+    return std::round(std::round(num * (factor * 10.0)) / 10.0) / factor;
+}
+
+// Redondeo para enteros (No afecta valores enteros)
+int round(int num, int) {
+    return num;
+}
+
+}
+
+
+#ifdef USING_VSCODE_AS_EDITOR
+    #include "Steer.h"
+#endif
+
+namespace pampas {
+
+void Steer::setPulseWidthRange(double min, double steady, double max)
+{
+    this->servo.setPulseWidthRange(min, steady, max);
+}
+
+void Steer::setPin(int pin)
+{
+    this->servo.setPin(pin);
+}
+
+void Steer::steer(double value, double proportionalConstant) // -1 < value < 1
+{
+    if (value > this->max || value < this->min) throw std::invalid_argument( "El valor esta fuera del rango: -1 < value < 1" );
+
+    double pulseWidthValue = pampas::remap(value, this->min, this->max, this->servo.pulseWidth.min, this->servo.pulseWidth.max);
+    
+    this->servo.setPulseWidth(pulseWidthValue);
+}
+
+}
+#ifdef USING_VSCODE_AS_EDITOR
+    #include "Exception.h"
+#endif
+
+
+namespace pampas {
+
+std::string Exception::formatMessage(const std::string& message, const std::string& file, int line) {
+    std::ostringstream oss;
+    oss << "\nError: " << message << "\n"
+        << "Archivo: " << file << "\n"
+        << "Linea: " << line;
+    return oss.str();
+}
+
+void raiseError(std::string msg) {
+    throw Exception(msg, __FILE__, __LINE__);
+}
+
+}
+
+#ifdef USING_VSCODE_AS_EDITOR
+    #include "LowPass.h"
+#endif
+
+
+namespace pampas {
+
+template<typename T>
+LowPass<T>::LowPass() : prevOutput(static_cast<T>(0)) {} // define el tipo de dato que se usara
+
+template<typename T>
+void LowPass<T>::setAlpha(T value) {
+    if (value < static_cast<T>(0) || value > static_cast<T>(1)) {
+        throw std::invalid_argument("Coeficiente de suavizado debe estar en el rango [0,1]");
+    }
+    this->alphaDefined = true;
+    alpha = value;
+}
+
+template<typename T>
+void LowPass<T>::setInitialValue(T value) {
+    this->prevOutput = value;
+}
+
+template<typename T>
+T LowPass<T>::filter(T input) {
+    if (!this->alphaDefined) {
+        throw std::runtime_error("Coeficiente de suavizado no ha sido inicializado o tiene un valor inválido.");
+    }
+
+    T output = alpha * input + (static_cast<T>(1) - alpha) * prevOutput;
+    prevOutput = output;
+    return output;
+}
+
+// Instanciaciones explícitas (necesario si se usa fuera del .h)
+
+template class LowPass<double>;
+template class LowPass<float>;
+template class LowPass<int>;
+
+} // namespace pampas
+
+#ifdef USING_VSCODE_AS_EDITOR
+    #include "Velocimeter.h"
+#endif
+
+namespace pampas {
+
+Velocimeter* velocimeterInstance = nullptr;
+
+Velocimeter::Velocimeter() 
+{
+    pampas::gpio::setupGpioPinout();
+    velocimeterInstance = this;
+
+    // prepara el cleanup en caso de un programa abortado !! REVISAR
+    std::signal(SIGINT, [](int) {
+        velocimeterInstance->cleanup();
+    });    
+
+}
+
+Velocimeter::~Velocimeter() 
+{
+    this->cleanup();
+}
+
+void Velocimeter::cleanup() {
+    gpio::stopOnInterrupt(velocimeterInstance->pin);
+}
+
+void Velocimeter::setPin(int pin) 
+{
+    this->pin = pin;
+}
+
+void Velocimeter::setWheelDiameter(double wheelDiameter) 
+{
+    this->wheelDiameter = wheelDiameter;
+    this->wheelCircumference = 2 * (wheelDiameter/2) * 3.1416;
+}
+
+void Velocimeter::setAlpha(double value)
+{
+    this->filter.setAlpha(value);
+}
+
+void Velocimeter::pulseHandlerWrapper() 
+{
+    velocimeterInstance->pulseHandler();
+}
+
+void Velocimeter::pulseHandler() 
+{
+    if (this->started == false) return;
+    
+    // this->distance += this->wheelCircumference;
+
+    clock_gettime(CLOCK_MONOTONIC, &this->endTime);
+    this->timeInterval = (endTime.tv_sec - startTime.tv_sec) + (endTime.tv_nsec - startTime.tv_nsec) / 1e9;
+    this->speed = (timeInterval > 0) ? (this->wheelCircumference / this->timeInterval) : 0.0;
+    clock_gettime(CLOCK_MONOTONIC, &this->startTime);
+    
+    this->udpated = true;    
+}
+ 
+void Velocimeter::start() 
+{
+    this->udpated = false;
+    if (this->started == true) return;
+
+    clock_gettime(CLOCK_MONOTONIC, &this->startTime);
+
+    gpio::pinMode(this->pin, INPUT);
+    gpio::onInterrupt(this->pin, INT_EDGE_RISING, &pulseHandlerWrapper);
+    
+    this->started = true;
+}
+
+double Velocimeter::getUpdateTimeInterval() 
+{
+    return this->timeInterval;
+}
+
+double Velocimeter::getSpeed() 
+{
+    // return this->speed;
+    return this->filter.filter(this->speed); // valor filtrado
+}
+
+double Velocimeter::getDistance() 
+{
+    return this->distance;
+}
+
+void Velocimeter::resetDistance() 
+{
+    this->distance = 0;
+}
+
+void Velocimeter::waitForUpdate(double timeoutSeconds) 
+{
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point end;
+    double timeDifference = 0;
+
+    while (!this->udpated && timeDifference <= timeoutSeconds) {
+        end = std::chrono::steady_clock::now();
+        timeDifference = std::chrono::duration_cast<std::chrono::seconds>(end - begin).count();
+        delay(10); // para evitar sobrecarga
+    }
+
+    if (timeDifference >= timeoutSeconds) {
+        this->speed = 0; // cuando se cumple el timeout, la velocidad se supone que es nula
+        // Como el sensor nunca detecto pulso, nunca se registra un intervalo de tiempo
+        // para eso se le da un nuevo valor que es el timeOut 
+        this->timeInterval = timeoutSeconds;
+    }
+    
+}
+
+}
+#ifdef USING_VSCODE_AS_EDITOR
+    #include "PID.h"
+#endif
+
+/* Creditos: https://github.com/pms67/PID/blob/master/PID.c */
+namespace pampas {
+
+PID::PID() 
+{
+    integrator_ = 0.0f;
+    prev_error_ = 0.0f;
+    differentiator_ = 0.0f;
+    prev_measurement_ = 0.0f;
+    out_ = 0.0f;
+}
+
+void PID::reset() {
+    integrator_ = 0.0f;
+    prev_error_ = 0.0f;
+    differentiator_ = 0.0f;
+    prev_measurement_ = 0.0f;
+    out_ = 0.0f;
+}
+
+double PID::calculate(double setpoint, double measurement, double sample_time_) 
+{
+    if (!gains_defined_) throw std::invalid_argument( "Faltan definir las ganancias del controlador PID" );
+    if (!params_defined_) throw std::invalid_argument( "Faltan definir los parametros del controlador PID" );
+
+    double error = setpoint - measurement;
+    double proportional = kp_ * error;
+    integrator_ += 0.5f * ki_ * sample_time_ * (error + prev_error_);
+
+    if (integrator_ > max_output_int_) {
+        integrator_ = max_output_int_;
+    } else if (integrator_ < min_output_int_) {
+        integrator_ = min_output_int_;
+    }
+
+    // Derivativo (filtro de paso bajo)
+    differentiator_ = -(2.0f * kd_ * (measurement - prev_measurement_) +
+                       (2.0f * tau_ - sample_time_) * differentiator_) /
+                     (2.0f * tau_ + sample_time_);
+
+    out_ = proportional + integrator_ + differentiator_;
+
+    if (out_ > max_output_) {
+        out_ = max_output_;
+    } else if (out_ < min_output_) {
+        out_ = min_output_;
+    }
+
+    prev_error_ = error;
+    prev_measurement_ = measurement;
+
+    return out_;
+}
+
+void PID::setGains(double kp, double ki, double kd) 
+{
+    this->gains_defined_ = true;
+    this->kp_ = kp;
+    this->ki_ = ki;
+    this->kd_ = kd;
+}
+
+void PID::setParameters(double tau_, double min_output_, double max_output_, double min_output_int_, double max_output_int_) 
+{
+    this->params_defined_ = true;
+    this->tau_ = tau_;
+    this->min_output_ = min_output_;
+    this->max_output_ = max_output_;
+    this->min_output_int_ = min_output_int_;
+    this->max_output_int_ = max_output_int_;
+}
+
+}
+#ifdef USING_VSCODE_AS_EDITOR
+    #include "Conversion.h"
+#endif
+
+namespace pampas {
+
+bool Conversion::isDefined() 
+{
+    return this->defined;
+}
+
+void Conversion::set(std::function<double(double)> func) 
+{
+    this->defined = true;
+    this->transferFunc = func;
+    
+}
+
+double Conversion::convert(double input) 
+{
+    if (!this->defined) throw std::runtime_error("Función de conversión no definida.");
+    return this->transferFunc(input);
+}
+
+}
+
+
+#ifdef USING_VSCODE_AS_EDITOR
+    #include "Drive.h"
+#endif
+#include <iostream>
+
+
+namespace pampas {
+
+Drive* driveInstance = nullptr;
+
+
+Drive::Drive()
+{
+    pampas::gpio::setupGpioPinout();
+}
+
+void Drive::setPid(double kp, double ki, double kd, double tau, double minOutput, double maxOutput, double minOutputInt, double maxOutputInt) 
+{
+    this->pid.setGains(kp, ki, kd);
+    this->pid.setParameters(tau, minOutput, maxOutput, minOutputInt, maxOutputInt);
+}
+
+void Drive::setVelocimeter(int pin, double wheelDiameterCM, double alpha) 
+{
+    this->velocimeter.setPin(pin);
+    this->velocimeter.setWheelDiameter(wheelDiameterCM);
+    this->velocimeter.setAlpha(alpha);
+}
+
+
+void Drive::setMotor(int pin, double pulseWidthMin, double pulseWidthSteady, double pulseWidthMax) 
+{
+    this->motor.setPin(pin);
+    this->motor.setPulseWidthRange(pulseWidthMin, pulseWidthSteady, pulseWidthMax);
+}
+
+void Drive::setTransferFunction(std::function<double(double)> func) 
+{
+    this->MsToPulseWidth.set(func);
+}
+
+void Drive::stop() {
+    this->running = false;
+    if (this->control.joinable()) this->control.join();
+}
+
+
+double Drive::update_model_reference(double v_ref, double dt, double w_n, double z) {
+
+    // Constantes internas (pueden ser ajustadas según tu sistema)
+    double wn = w_n;
+    double zeta = z;
+
+    // Ecuación del modelo de referencia (sistema de segundo orden)
+    double ddv_m = (wn * wn) * v_ref - 2.0 * zeta * wn * dv_m_ - (wn * wn) * v_m_;
+    // std::cout << (wn * wn) * v_ref << " - ";
+    // std::cout << 2.0 * zeta * wn * dv_m << " - ";
+    // std::cout << (wn * wn) * v_m<< "\n\n";
+
+    dv_m_ += ddv_m * dt;
+    v_m_ += dv_m_ * dt;
+
+    return v_m_;
+}
+
+void Drive::controlledSpeed(double speed, double w_n, double z) 
+{
+    
+    double kp_adap = 0.0;
+    double ki_adap = 0.0;
+    double kd_adap = 0.0;
+
+    double err_int = 0.0;
+
+    double prev_error = 0.0;
+    
+    double g_p = 0.0;
+    double g_d = 0.0;
+    double g_i = 0.0;
+    
+    std::cout << "Ingrese el valor de gamma_p: ";
+    std::cin >> g_p;
+    
+    std::cout << "Ingrese el valor de gamma_i: ";
+    std::cin >> g_i;
+
+    std::cout << "Ingrese el valor de gamma_d: ";
+    std::cin >> g_d;
+
+    std::cout << "Ingrese el valor de tau: ";
+    double tau_filter;                      // constante de tiempo del filtro
+    std::cin >> tau_filter;
+    
+    std::cout << "PID ADAPTATIVO: setpoint(" << speed << ")  wn(" << w_n << ") zeta(" << z << ") g_p(" << g_p << ") g_i(" << g_i << ")  g_d(" << g_d << ")\n";
+    v_m_ = 0.0;
+    dv_m_ = 0.0;
+    
+    this->pid.reset();
+    
+    this->motor.setPulseWidth(this->MsToPulseWidth.convert(speed));
+    
+    clock_gettime(CLOCK_MONOTONIC, &this->velocimeter.startTime);
+    
+    
+    auto inicio = std::chrono::steady_clock::now();
+    
+
+
+    double deriv_error_filtered = 0; 
+
+    while (true) {
+        this->velocimeter.start();
+        this->velocimeter.waitForUpdate();
+        
+        double measurement = this->velocimeter.getSpeed();
+        double dt = this->velocimeter.getUpdateTimeInterval();
+
+        double model_reference_setpoint = update_model_reference(speed, dt, w_n, z);
+        double error = model_reference_setpoint - measurement;
+
+        
+        kp_adap += ((-g_p) * (0.0313*error + 0.0553*(error - prev_error)/dt) * error) * dt;
+        if (kp_adap > 100) kp_adap = 100.0;
+        if (kp_adap < 0) kp_adap = 0;
+
+
+        // Derivada cruda
+        double raw_deriv = (error - prev_error) / dt;
+
+        // Filtro exponencial de primer orden
+        deriv_error_filtered = (tau_filter * deriv_error_filtered + dt * raw_deriv) / (tau_filter + dt);
+
+        kd_adap += ((-g_d) * (0.0313*error + 0.0553*(deriv_error_filtered)/dt) * (deriv_error_filtered)/dt) * dt;
+        if (kd_adap > 50) kd_adap = 50.0;
+        // if (kd_adap < 0) kd_adap = 0;
+        
+        err_int += error * dt;
+        ki_adap += (-g_i) * (0.0313*error + 0.0553*(error - prev_error)/dt) * err_int;
+        
+        this->pid.setGains(kp_adap, ki_adap, kd_adap);
+
+        prev_error = error;
+        
+        double newSpeed = this->pid.calculate(
+            model_reference_setpoint, 
+            measurement, 
+            dt
+        );
+
+        this->motor.setPulseWidth(this->MsToPulseWidth.convert(newSpeed));
+
+        std::cout << "SetPoint: " << speed << " | MD SetPoint: " << model_reference_setpoint << " | Velocimetro: " << measurement << " | Velocidad Nueva: " << newSpeed << " | KP(" << this->pid.kp_ <<")" << " KI(" << this->pid.ki_ << ")" << " KD(" << this->pid.kd_ << ") dt(" << dt << ")\n";
+    }
+
+}
+
+void Drive::run(double speed, double w_n, double z) 
+{
+    // if (speed == this->runningSpeed) return; // evita que se cree un nuevo thread para una velocidad ya definida
+
+    // this->stop();
+    this->runningSpeed = speed;
+    this->running = true;
+    
+    this->controlledSpeed(speed, w_n, z);
+    // this->control = std::thread(&Drive::controlledSpeed, this, speed, w_n, z);
+}
+
+}
+#ifdef USING_VSCODE_AS_EDITOR
+    #include "Writer.h"
+#endif
+
+namespace pampas {
+    
+Writer::Writer(std::string filename, std::string header, std::string delim) : is_open(false), delimiter(delim)
+{
+    file.open(filename);
+    if (file.is_open()) {
+        is_open = true;
+        file << header << "\n";
+    } else {
+        std::cerr << "Error: No se pudo abrir el archivo " << filename << "\n";
+    }
+}
+
+Writer::~Writer() 
+{
+    if (is_open) file.close();
+}
+
+void Writer::write_row(const std::vector<std::string>& data) 
+{
+    if (!is_open) {
+        std::cerr << "Error: El archivo no está abierto.\n";
+        return;
+    } 
+    std::ostringstream oss;
+    for (size_t i = 0; i < data.size(); ++i) {
+        oss << data[i];
+        if (i != data.size() - 1) {
+            oss << delimiter;
+        }
+    }
+    file << oss.str() << "\n";
+}
+
+void Writer::close() 
+{
+    if (is_open) {
+        file.close();
+        is_open = false;
+    }
+}
+
+}
+/*
+* _dev: funcionalidad para desarrollo interno
+*/
+
+
+#ifdef USING_VSCODE_AS_EDITOR
+    #include "_dev.h"
+#endif
+
+namespace pampas {
+
+void hello() 
+{
+    std::cout << "HELLO FROM PAMPAS!" << std::endl;
+}
+
+}
+// I2Cdev library collection - Main I2C device class
+// Abstracts bit and byte I2C R/W functions into a convenient class
+// 6/9/2012 by Jeff Rowberg <jeff@rowberg.net>
+//
+// Updated:
+// 14/04/2014 by Gregory Dymare <gregd72002@gmail.com> - removed C++ dependencies
+//
+// Changelog:
+//     2012-06-09 - fix major issue with reading > 32 bytes at a time with Arduino Wire
+//                - add compiler warnings when using outdated or IDE or limited I2Cdev implementation
+//     2011-11-01 - fix write*Bits mask calculation (thanks sasquatch @ Arduino forums)
+//     2011-10-03 - added automatic Arduino version detection for ease of use
+//     2011-10-02 - added Gene Knight's NBWire TwoWire class implementation with small modifications
+//     2011-08-31 - added support for Arduino 1.0 Wire library (methods are different from 0.x)
+//     2011-08-03 - added optional timeout parameter to read* methods to easily change from default
+//     2011-08-02 - added support for 16-bit registers
+//                - fixed incorrect Doxygen comments on some methods
+//                - added timeout value for read operations (thanks mem @ Arduino forums)
+//     2011-07-30 - changed read/write function structures to return success or byte counts
+//                - made all methods static for multi-device memory savings
+//     2011-07-28 - initial release
+
+/* ============================================
+I2Cdev device library code is placed under the MIT license
+Copyright (c) 2012 Jeff Rowberg
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+===============================================
+*/
+
+#ifdef USING_VSCODE_AS_EDITOR
+    #include "I2Cdev.h"
+#endif
+
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <linux/i2c-dev.h>
+
+namespace pampas {
+
+    
+    /** Default timeout value for read operations.
+ * Set this to 0 to disable timeout detection.
+ */
+uint16_t readTimeout = 0;
+/** Default constructor.
+ */
+
+/** Read a single bit from an 8-bit device register.
+ * @param devAddr I2C slave device address
+ * @param regAddr Register regAddr to read from
+ * @param bitNum Bit position to read (0-7)
+ * @param data Container for single bit value
+ * @param timeout Optional read timeout in milliseconds (0 to disable, leave off to use default class value in I2Cdev::readTimeout)
+ * @return Status of read operation (true = success)
+ */
+int8_t readBit(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint8_t *data) {
+    uint8_t b;
+    uint8_t count = readByte(devAddr, regAddr, &b);
+    *data = b & (1 << bitNum);
+    return count;
+}
+
+/** Read a single bit from a 16-bit device register.
+ * @param devAddr I2C slave device address
+ * @param regAddr Register regAddr to read from
+ * @param bitNum Bit position to read (0-15)
+ * @param data Container for single bit value
+ * @param timeout Optional read timeout in milliseconds (0 to disable, leave off to use default class value in I2Cdev::readTimeout)
+ * @return Status of read operation (true = success)
+ */
+int8_t readBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t *data) {
+    uint16_t b;
+    uint8_t count = readWord(devAddr, regAddr, &b);
+    *data = b & (1 << bitNum);
+    return count;
+}
+
+/** Read multiple bits from an 8-bit device register.
+ * @param devAddr I2C slave device address
+ * @param regAddr Register regAddr to read from
+ * @param bitStart First bit position to read (0-7)
+ * @param length Number of bits to read (not more than 8)
+ * @param data Container for right-aligned value (i.e. '101' read from any bitStart position will equal 0x05)
+ * @param timeout Optional read timeout in milliseconds (0 to disable, leave off to use default class value in I2Cdev::readTimeout)
+ * @return Status of read operation (true = success)
+ */
+int8_t readBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t *data) {
+    // 01101001 read byte
+    // 76543210 bit numbers
+    //    xxx   args: bitStart=4, length=3
+    //    010   masked
+    //   -> 010 shifted
+    uint8_t count, b;
+    if ((count = readByte(devAddr, regAddr, &b)) != 0) {
+        uint8_t mask = ((1 << length) - 1) << (bitStart - length + 1);
+        b &= mask;
+        b >>= (bitStart - length + 1);
+        *data = b;
+    }
+    return count;
+}
+
+/** Read multiple bits from a 16-bit device register.
+ * @param devAddr I2C slave device address
+ * @param regAddr Register regAddr to read from
+ * @param bitStart First bit position to read (0-15)
+ * @param length Number of bits to read (not more than 16)
+ * @param data Container for right-aligned value (i.e. '101' read from any bitStart position will equal 0x05)
+ * @param timeout Optional read timeout in milliseconds (0 to disable, leave off to use default class value in I2Cdev::readTimeout)
+ * @return Status of read operation (1 = success, 0 = failure, -1 = timeout)
+ */
+int8_t readBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint16_t *data) {
+    // 1101011001101001 read byte
+    // fedcba9876543210 bit numbers
+    //    xxx           args: bitStart=12, length=3
+    //    010           masked
+    //           -> 010 shifted
+    uint8_t count;
+    uint16_t w;
+    if ((count = readWord(devAddr, regAddr, &w)) != 0) {
+        uint16_t mask = ((1 << length) - 1) << (bitStart - length + 1);
+        w &= mask;
+        w >>= (bitStart - length + 1);
+        *data = w;
+    }
+    return count;
+}
+
+/** Read single byte from an 8-bit device register.
+ * @param devAddr I2C slave device address
+ * @param regAddr Register regAddr to read from
+ * @param data Container for byte value read from device
+ * @param timeout Optional read timeout in milliseconds (0 to disable, leave off to use default class value in I2Cdev::readTimeout)
+ * @return Status of read operation (true = success)
+ */
+int8_t readByte(uint8_t devAddr, uint8_t regAddr, uint8_t *data) {
+    return readBytes(devAddr, regAddr, 1, data);
+}
+
+/** Read single word from a 16-bit device register.
+ * @param devAddr I2C slave device address
+ * @param regAddr Register regAddr to read from
+ * @param data Container for word value read from device
+ * @param timeout Optional read timeout in milliseconds (0 to disable, leave off to use default class value in I2Cdev::readTimeout)
+ * @return Status of read operation (true = success)
+ */
+int8_t readWord(uint8_t devAddr, uint8_t regAddr, uint16_t *data) {
+    return readWords(devAddr, regAddr, 1, data);
+}
+
+/** Read multiple bytes from an 8-bit device register.
+ * @param devAddr I2C slave device address
+ * @param regAddr First register regAddr to read from
+ * @param length Number of bytes to read
+ * @param data Buffer to store read data in
+ * @param timeout Optional read timeout in milliseconds (0 to disable, leave off to use default class value in I2Cdev::readTimeout)
+ * @return Number of bytes read (-1 indicates failure)
+ */
+int8_t readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data) {
+    int8_t count = 0;
+#ifdef DEBUG
+printf("read %#x %#x %u\n",devAddr,regAddr,length);
+#endif
+int fd = open("/dev/i2c-1", O_RDWR);
+
+if (fd < 0) {
+    fprintf(stderr, "Failed to open device: %s\n", strerror(errno));
+    return(-1);
+}
+if (ioctl(fd, I2C_SLAVE, devAddr) < 0) {
+    fprintf(stderr, "Failed to select device: %s\n", strerror(errno));
+    close(fd);
+    return(-1);
+}
+if (write(fd, &regAddr, 1) != 1) {
+    fprintf(stderr, "Failed to write reg: %s\n", strerror(errno));
+    close(fd);
+    return(-1);
+}
+count = read(fd, data, length);
+if (count < 0) {
+    fprintf(stderr, "Failed to read device(%d): %s\n", count, strerror(errno));
+    close(fd);
+    return(-1);
+} else if (count != length) {
+    fprintf(stderr, "Short read  from device, expected %d, got %d\n", length, count);
+    close(fd);
+    return(-1);
+}
+close(fd);
+
+return count;
+}
+
+/** Read multiple words from a 16-bit device register.
+ * @param devAddr I2C slave device address
+ * @param regAddr First register regAddr to read from
+ * @param length Number of words to read
+ * @param data Buffer to store read data in
+ * @param timeout Optional read timeout in milliseconds (0 to disable, leave off to use default class value in I2Cdev::readTimeout)
+ * @return Number of words read (0 indicates failure)
+ */
+int8_t readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t *data) {
+    int8_t count = 0;
+    
+    printf("ReadWords() not implemented\n");
+    // Use readBytes() and potential byteswap
+    *data = 0; // keep the compiler quiet
+    
+    return count;
+}
+
+/** write a single bit in an 8-bit device register.
+ * @param devAddr I2C slave device address
+ * @param regAddr Register regAddr to write to
+ * @param bitNum Bit position to write (0-7)
+ * @param value New bit value to write
+ * @return Status of operation (true = success)
+ */
+int writeBit(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint8_t data) {
+    uint8_t b;
+    readByte(devAddr, regAddr, &b);
+    b = (data != 0) ? (b | (1 << bitNum)) : (b & ~(1 << bitNum));
+    return writeByte(devAddr, regAddr, b);
+}
+
+/** write a single bit in a 16-bit device register.
+ * @param devAddr I2C slave device address
+ * @param regAddr Register regAddr to write to
+ * @param bitNum Bit position to write (0-15)
+ * @param value New bit value to write
+ * @return Status of operation (true = success)
+ */
+int writeBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t data) {
+    uint16_t w;
+    readWord(devAddr, regAddr, &w);
+    w = (data != 0) ? (w | (1 << bitNum)) : (w & ~(1 << bitNum));
+    return writeWord(devAddr, regAddr, w);
+}
+
+/** Write multiple bits in an 8-bit device register.
+ * @param devAddr I2C slave device address
+ * @param regAddr Register regAddr to write to
+ * @param bitStart First bit position to write (0-7)
+ * @param length Number of bits to write (not more than 8)
+ * @param data Right-aligned value to write
+ * @return Status of operation (true = success)
+ */
+int writeBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t data) {
+    //      010 value to write
+    // 76543210 bit numbers
+    //    xxx   args: bitStart=4, length=3
+    // 00011100 mask byte
+    // 10101111 original value (sample)
+    // 10100011 original & ~mask
+    // 10101011 masked | value
+    uint8_t b;
+    if (readByte(devAddr, regAddr, &b) != 0) {
+        uint8_t mask = ((1 << length) - 1) << (bitStart - length + 1);
+        data <<= (bitStart - length + 1); // shift data into correct position
+        data &= mask; // zero all non-important bits in data
+        b &= ~(mask); // zero all important bits in existing byte
+        b |= data; // combine data with existing byte
+        return writeByte(devAddr, regAddr, b);
+    } else {
+        return -1;
+    }
+}
+
+/** Write multiple bits in a 16-bit device register.
+ * @param devAddr I2C slave device address
+ * @param regAddr Register regAddr to write to
+ * @param bitStart First bit position to write (0-15)
+ * @param length Number of bits to write (not more than 16)
+ * @param data Right-aligned value to write
+ * @return Status of operation (true = success)
+ */
+int writeBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint16_t data) {
+    //              010 value to write
+    // fedcba9876543210 bit numbers
+    //    xxx           args: bitStart=12, length=3
+    // 0001110000000000 mask byte
+    // 1010111110010110 original value (sample)
+    // 1010001110010110 original & ~mask
+    // 1010101110010110 masked | value
+    uint16_t w;
+    if (readWord(devAddr, regAddr, &w) != 0) {
+        uint8_t mask = ((1 << length) - 1) << (bitStart - length + 1);
+        data <<= (bitStart - length + 1); // shift data into correct position
+        data &= mask; // zero all non-important bits in data
+        w &= ~(mask); // zero all important bits in existing word
+        w |= data; // combine data with existing word
+        return writeWord(devAddr, regAddr, w);
+    } else {
+        return -1;
+    }
+}
+
+/** Write single byte to an 8-bit device register.
+ * @param devAddr I2C slave device address
+ * @param regAddr Register address to write to
+ * @param data New byte value to write
+ * @return Status of operation (true = success)
+ */
+int writeByte(uint8_t devAddr, uint8_t regAddr, uint8_t data) {
+    return writeBytes(devAddr, regAddr, 1, &data);
+}
+
+/** Write single word to a 16-bit device register.
+ * @param devAddr I2C slave device address
+ * @param regAddr Register address to write to
+ * @param data New word value to write
+ * @return Status of operation (true = success)
+ */
+int writeWord(uint8_t devAddr, uint8_t regAddr, uint16_t data) {
+    return writeWords(devAddr, regAddr, 1, &data);
+}
+
+/** Write multiple bytes to an 8-bit device register.
+ * @param devAddr I2C slave device address
+ * @param regAddr First register address to write to
+ * @param length Number of bytes to write
+ * @param data Buffer to copy new data from
+ * @return Status of operation (true = success)
+ */
+int writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t* data) {
+    int8_t count = 0;
+    uint8_t buf[128];
+    int fd;
+    
+    #ifdef DEBUG
+    printf("write %#x %#x\n",devAddr,regAddr);
+    #endif
+    if (length > 127) {
+        fprintf(stderr, "Byte write count (%d) > 127\n", length);
+        return -1;
+    }
+    
+    fd = open("/dev/i2c-1", O_RDWR);
+    if (fd < 0) {
+        fprintf(stderr, "Failed to open device: %s\n", strerror(errno));
+        return -1;
+    }
+    if (ioctl(fd, I2C_SLAVE, devAddr) < 0) {
+        fprintf(stderr, "Failed to select device: %s\n", strerror(errno));
+        close(fd);
+        return -1;
+    }
+    buf[0] = regAddr;
+    memcpy(buf+1,data,length);
+    count = write(fd, buf, length+1);
+    if (count < 0) {
+        fprintf(stderr, "Failed to write device(%d): %s\n", count, strerror(errno));
+        close(fd);
+        return -1;
+    } else if (count != length+1) {
+        fprintf(stderr, "Short write to device, expected %d, got %d\n", length+1, count);
+        close(fd);
+        return -1;
+    }
+    close(fd);
+    
+    return 0;
+}
+
+/** Write multiple words to a 16-bit device register.
+ * @param devAddr I2C slave device address
+ * @param regAddr First register address to write to
+ * @param length Number of words to write
+ * @param data Buffer to copy new data from
+ * @return Status of operation (true = success)
+ */
+int writeWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t* data) {
+    int8_t count = 0;
+    uint8_t buf[128];
+    int i, fd;
+    
+    // Should do potential byteswap and call writeBytes() really, but that
+    // messes with the callers buffer
+    
+    if (length > 63) {
+        fprintf(stderr, "Word write count (%d) > 63\n", length);
+        return -1;
+    }
+    
+    fd = open("/dev/i2c-1", O_RDWR);
+    if (fd < 0) {
+        fprintf(stderr, "Failed to open device: %s\n", strerror(errno));
+        return -1;
+    }
+    if (ioctl(fd, I2C_SLAVE, devAddr) < 0) {
+        fprintf(stderr, "Failed to select device: %s\n", strerror(errno));
+        close(fd);
+        return -1;
+    }
+    buf[0] = regAddr;
+    for (i = 0; i < length; i++) {
+        buf[i*2+1] = data[i] >> 8;
+        buf[i*2+2] = data[i];
+    }
+    count = write(fd, buf, length*2+1);
+    if (count < 0) {
+        fprintf(stderr, "Failed to write device(%d): %s\n", count, strerror(errno));
+        close(fd);
+        return -1;
+    } else if (count != length*2+1) {
+        fprintf(stderr, "Short write to device, expected %d, got %d\n", length+1, count);
+        close(fd);
+        return -1;
+    }
+    close(fd);
+    return 0;
+}
+
+} // namespace pampas
 #ifdef USING_VSCODE_AS_EDITOR
 #include "MPU9250.h"
 #endif
@@ -1319,4 +2496,5 @@ void MPU9250FIFO::getFifoTemperature_C(size_t *size,float* data) {
 //     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 // }
 }
+
 

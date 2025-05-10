@@ -16,8 +16,7 @@ class Velocimeter
 {
 private:
     double wheelCircumference;
-    double timeInterval;
-    struct timespec startTime, endTime;
+    double timeInterval = 0.0;
     static void pulseHandlerWrapper();
     bool distance = 0.0;
     int pin;
@@ -28,6 +27,7 @@ private:
     void pulseHandler();
     LowPass<double> filter;
 public:
+    struct timespec startTime = {0}, endTime = {0};
     Velocimeter();
     ~Velocimeter();
     
@@ -40,7 +40,7 @@ public:
     double getDistance();
     void resetDistance();
 
-    void waitForUpdate(double timeoutSeconds = 2.0);
+    void waitForUpdate(double timeoutSeconds = 2.0f);
     void start(); // este metodo debe llamarse al iniciar las mediciones de velocidad
     void cleanup(); // llamar si o si a este metodo al final del programa, en caso de un programa abortado ejecutara automaticamente.
 };
