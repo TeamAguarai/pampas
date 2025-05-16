@@ -66,9 +66,9 @@ double Drive::update_model_reference(double v_ref, double dt, double w_n, double
 void Drive::controlledSpeed(double speed, double w_n, double z) 
 {
     
-    double kp_adap = 0.0;
-    double ki_adap = 0.0;
-    double kd_adap = 0.0;
+    double kp_adap = 0;
+    double ki_adap = 0;
+    double kd_adap = 0;
 
     double err_int = 0.0;
 
@@ -78,6 +78,15 @@ void Drive::controlledSpeed(double speed, double w_n, double z)
     double g_d = 0.0;
     double g_i = 0.0;
     
+    std::cout << "Ingrese el valor de kpadap_0: ";
+    std::cin >> kp_adap;
+    
+    std::cout << "Ingrese el valor de kiadap_0: ";
+    std::cin >> ki_adap;
+
+    std::cout << "Ingrese el valor de kdadap_0: ";
+    std::cin >> kd_adap;
+
     std::cout << "Ingrese el valor de gamma_p: ";
     std::cin >> g_p;
     
@@ -97,23 +106,24 @@ void Drive::controlledSpeed(double speed, double w_n, double z)
     
     this->pid.reset();
     
-    this->motor.setPulseWidth(this->MsToPulseWidth.convert(speed));
+    // this->motor.setPulseWidth(this->MsToPulseWidth.convert(speed));
+
+    // delay(2000);
     
     clock_gettime(CLOCK_MONOTONIC, &this->velocimeter.startTime);
-    
-    
-    auto inicio = std::chrono::steady_clock::now();
-    
 
 
     double deriv_error_filtered = 0; 
 
     while (true) {
+        
+        double dt_control = 0.01666667;
+        
         this->velocimeter.start();
         this->velocimeter.waitForUpdate(); // el programa se detiene hasta que el velocimetro detecte movimiento
         
         double measurement = this->velocimeter.getSpeed();
-        double dt = this->velocimeter.getUpdateTimeInterval();
+        double dt = dt_control; // this->velocimeter.getUpdateTimeInterval();
 
         double model_reference_setpoint = update_model_reference(speed, dt, w_n, z);
         double error = model_reference_setpoint - measurement;
@@ -134,28 +144,39 @@ void Drive::controlledSpeed(double speed, double w_n, double z)
         double raw_deriv = (error - prev_error) / dt;
         // Filtro exponencial de primer orden
         deriv_error_filtered = (tau_filter * deriv_error_filtered + dt * raw_deriv) / (tau_filter + dt);
-        kd_adap += ((-g_d) * (0.0313*error + 0.0553*(deriv_error_filtered)/dt) * (deriv_error_filtered)/dt) * dt;
+        kd_adap += ((-g_d) * (0.0313*error + 0.0553*(deriv_error_filtered)) * (deriv_error_filtered)) * dt;
         if (kd_adap > 50) kd_adap = 50.0;
-        // if (kd_adap < 0) kd_adap = 0;
+        if (kd_adap < 0) kd_adap = 0;
 
 
         /* Define las ganacias adaptadas en un controlador PID clasico */
-        this->pid.setGains(kp_adap, ki_adap, kd_adap);
+
+
+        double newSpeed = error * kp_adap + deriv_error_filtered * kd_adap;
+        std::cout << "\n\nNew Speed: " << error * kp_adap << " + " << deriv_error_filtered * kd_adap << "\n";
+
+        if (newSpeed > 3) {
+            newSpeed = 3;
+        } else if (newSpeed < 0) {
+            newSpeed = 0;
+        }
+
+        // this->pid.setGains(kp_adap, ki_adap, kd_adap);
 
         prev_error = error;
         
         /* Salida del controlador PID */
-        double newSpeed = this->pid.calculate(
-            model_reference_setpoint, 
-            measurement, 
-            dt
-        );
+        // double newSpeed = this->pid.calculate(
+        //     model_reference_setpoint, 
+        //     measurement, 
+        //     dt
+        // );
 
         /* Accionar al motor al ancho de pulso adecuado para velocidad controlada */
         this->motor.setPulseWidth(this->MsToPulseWidth.convert(newSpeed));
 
         /* Imprime valores para debug */
-        std::cout << "SetPoint: " << speed << " | MD SetPoint: " << model_reference_setpoint << " | Velocimetro: " << measurement << " | Velocidad Nueva: " << newSpeed << " | KP(" << this->pid.kp_ <<")" << " KI(" << this->pid.ki_ << ")" << " KD(" << this->pid.kd_ << ") dt(" << dt << ")\n";
+        std::cout << "SetPoint: " << speed << " | MD SetPoint: " << model_reference_setpoint << " | Velocimetro: " << measurement << " | Velocidad Nueva: " << newSpeed << " | KP(" << kp_adap <<")" << " KI(" << ki_adap << ")" << " KD(" << kd_adap << ") dt(" << dt << ")\n";
     }
 
 }

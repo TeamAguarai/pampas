@@ -29,7 +29,7 @@ double PID::calculate(double setpoint, double measurement, double sample_time_)
 
     double error = setpoint - measurement;
     double proportional = kp_ * error;
-    integrator_ += 0.5f * ki_ * sample_time_ * (error + prev_error_);
+    integrator_ += ki_ * sample_time_ * (error + prev_error_);
 
     if (integrator_ > max_output_int_) {
         integrator_ = max_output_int_;
@@ -38,9 +38,7 @@ double PID::calculate(double setpoint, double measurement, double sample_time_)
     }
 
     // Derivativo (filtro de paso bajo)
-    differentiator_ = -(2.0f * kd_ * (measurement - prev_measurement_) +
-                       (2.0f * tau_ - sample_time_) * differentiator_) /
-                     (2.0f * tau_ + sample_time_);
+    differentiator_ = (measurement - prev_measurement_) / sample_time_;
 
     out_ = proportional + integrator_ + differentiator_;
 
@@ -52,6 +50,8 @@ double PID::calculate(double setpoint, double measurement, double sample_time_)
 
     prev_error_ = error;
     prev_measurement_ = measurement;
+
+    std::cout << "\n\nPID Math: " << proportional << " + " << integrator_ << " + " << differentiator_ << "\n";
 
     return out_;
 }

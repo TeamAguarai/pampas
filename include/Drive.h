@@ -23,9 +23,9 @@ private:
     double dv_m_ = 0.0;
 
 public:
-    pampas::Conversion MsToPulseWidth_; 
-    pampas::Motor motor_;
-    pampas::Velocimeter velocimeter_;
+    pampas::Conversion MsToPulseWidth; 
+    pampas::Motor motor;
+    pampas::Velocimeter velocimeter;
     Drive();
     void run(double speed, double w_n, double z);
     void stop();
