@@ -11,7 +11,7 @@ int main() {
 
     Velocimeter velocimeter;
     velocimeter.setPin(17);
-    velocimeter.setWheelDiameter(0.105);
+    velocimeter.setWheelDiameter(0.105/2);
     velocimeter.setAlpha(1.0);
     velocimeter.start();
 

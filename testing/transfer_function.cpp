@@ -20,7 +20,7 @@ int main() {
     velocimeter.setAlpha(0.9);
 
     Writer writer("anchoDePulso_Velocidad_xd.csv", "ancho de pulso (ms), velocidad (m/s)");
-    std::vector<std::string> row = {"",""};
+    std::vector<std::string> row = {"","",""};
         
     std::cout << "Inicio." << std::endl;    
     
@@ -33,17 +33,24 @@ int main() {
     std::cin >> segundos;
 
     int lecturas = 0;
+    motor.setPulseWidth(adp);
 
+    //double distancia = 2 * (0.105) * 3.1416;
+    double distancia = (3.1416 * 0.105) / 2; // para 2 imanes
     auto inicio = std::chrono::steady_clock::now();
+    double dt_total = 0;
     while (std::chrono::steady_clock::now() - inicio < std::chrono::seconds(segundos)) {
         lecturas++;
-        motor.setPulseWidth(adp);
         velocimeter.start();
         velocimeter.waitForUpdate();
+        double dt = velocimeter.getUpdateTimeInterval();
         
         row[0] = std::to_string(adp);
         row[1] = std::to_string(velocimeter.getSpeed());
+        dt_total += dt;
+        row[2] = std::to_string(dt_total);
         writer.write_row(row);
+        std::cout << velocimeter.getUpdateTimeInterval() << " * " << distancia << " = " << velocimeter.getUpdateTimeInterval() * distancia << " = " << velocimeter.getSpeed() << "\n" ;
     }
     std::cout << "Fin." << std::endl;    
     std::cout << "Lecturas realizadas: " << lecturas << std::endl;    
