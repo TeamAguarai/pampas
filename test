@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$#" -lt 2 ]; then
-    echo "Uso: $0 <SOURCE_CPP> <DIRNAME> <OUTPUT_EXECUTABLE_NAME>"
+    echo "Uso: $0 <ARCHIVO_TESTING> <NOMBRE_DE_LA_CARPETA_NUEVA> <NOMBRE_DEL_EJECUTABLE>"
     exit 1
 fi
 
@@ -17,3 +17,5 @@ cp $FILE_TO_TEST $DIRNAME
 
 # crear makefile
 echo -e "all:\n\tg++ $(basename "$FILE_TO_TEST") pampas.cpp -o $OUTPUT -lwiringPi \n\tsudo ./$OUTPUT" > $DIRNAME/makefile
+
+echo "Archivo $FILE_TOTEST copiado en la carpeta $DIRNAME"
