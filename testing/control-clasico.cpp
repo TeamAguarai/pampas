@@ -23,9 +23,18 @@ double polinomialRegression(double x) {
 int main() {
 
     pampas::Drive drive;
-    drive.setPid(2.9869, 0, -0.00084458, 0.1, -10, 3, -8, 8);
+
+    double kp, ki, kd;
+    std::cout << "Ingrese el valor de kp: ";
+    std::cin >> kp;
+    std::cout << "Ingrese el valor de ki: ";
+    std::cin >> ki;
+    std::cout << "Ingrese el valor de kd: ";
+    std::cin >> kd;
+    
+    drive.setPid(kp, ki, kd, 0.1, 0, 3, -3.0, 3.0);
     drive.setTransferFunction(polinomialRegression);
-    drive.setMotor(18, 1.5, 1.5, 1.7);
+    drive.setMotor(18, 1.5, 1.5, 1.8);
     drive.setVelocimeter(17, 0.105, 1.0f);
     
     std::cout << "INICIO BUCLE\n";

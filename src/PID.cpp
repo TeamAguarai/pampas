@@ -38,7 +38,7 @@ double PID::calculate(double setpoint, double measurement, double sample_time_)
     }
 
     // Derivativo (filtro de paso bajo)
-    differentiator_ = (measurement - prev_measurement_) / sample_time_;
+    differentiator_ = ((measurement - prev_measurement_) / sample_time_) * kd_;
 
     out_ = proportional + integrator_ + differentiator_;
 
