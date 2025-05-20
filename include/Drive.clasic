@@ -7,9 +7,11 @@
 #endif
 
 #include <thread>
+#include <iostream>
 #include <functional>
 
 namespace pampas {
+
 
 class Drive {
 private:
@@ -17,17 +19,13 @@ private:
     pampas::PID pid; // el metodo pid.set debe de llamarse antes de mover al motor
     bool running = false;
     double runningSpeed = 0;
-    void controlledSpeed(double speed, double w_n, double z);
-    double update_model_reference(double v_ref, double dt, double w_n, double z);
-    double v_m_ = 0.0;
-    double dv_m_ = 0.0;
-
+    void controlledSpeed(double speed);
 public:
-    pampas::Conversion MsToPulseWidth; 
+    pampas::Conversion MsToPulseWidth; // el metodo pulseWidthToMs.set debe de llamarse antes de mover al motor
     pampas::Motor motor;
     pampas::Velocimeter velocimeter;
     Drive();
-    void run(double speed, double w_n, double z);
+    void run(double speed);
     void stop();
 
     /* Llamar estos metodos antes de mover al motor */
