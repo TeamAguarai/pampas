@@ -7,7 +7,7 @@ Controla un vehículo RC como el <a href="https://www.amazon.com/Hobao-HB-VS-C30
 ## ⚠️ Instalación
 > El proyecto está diseñado únicamente para un vehículo con características idénticas al [HYPER VS 1/8 BUGGY NITRO](https://www.amazon.com/Hobao-HB-VS-C30BU-Hyper-Buggy-Engine/dp/B00MY3ROS2) y únicamente puede ser instalado en un Raspberry Pi.
 
-En cualquier carpeta de tu sistema, clona este repositorio y ejecuta el archivo <a href="https://github.com/TeamAguarai/Control/blob/main/install">install</a> (con permisos de administrador)
+En cualquier carpeta de del Raspberry Pi, clona este repositorio y ejecuta el archivo <a href="https://github.com/TeamAguarai/Control/blob/main/install">install</a> (con permisos de administrador)
 ```bash
 git clone https://github.com/TeamAguarai/pampas
 cd pampas
