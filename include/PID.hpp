@@ -1,5 +1,4 @@
 /*
-PID.hpp
 Credits: https://github.com/pms67/PID/blob/master/PID.h
 
 Classic PID controller class.
@@ -21,6 +20,7 @@ while (loop) {
 #include "Exception.hpp"
 #include "Derivative.hpp"
 #include "Integral.hpp"
+#include "LowPass.hpp"
 #endif
 
 namespace pampas {
@@ -42,6 +42,7 @@ protected:
 
     Derivative ErrorDerivative_;
     Integral ErrorIntegral_;
+    LowPass DerivativeFilter_;
 
     float beta_;   // For 2DOF PID
     float gamma_;  // For 2DOF PID
@@ -63,7 +64,8 @@ public:
 // --- Implementation ---
 
 /* Default constructor: initializes internal states and resets integrator/derivator */
-PID::PID() {
+PID::PID():DerivativeFilter_() {
+    Derivative.setInitialValue(0);
     ErrorDerivative_.reset();
     ErrorIntegral_.reset();
 }
@@ -83,7 +85,7 @@ float PID::calculate(float setpoint, float measurement, float sample_time_) {
 
     float proportional = kp_ * error;
     float integral = ki_ * ErrorIntegral_.compute(error, sample_time_, min_integral_, max_integral_);
-    float derivative = kd_ * ErrorDerivative_.compute(error, sample_time_);
+    float derivative = DerivativeFilter_.filter(kd_ * ErrorDerivative_.compute(error, sample_time_));
 
     float out = proportional + integral + derivative;
 
