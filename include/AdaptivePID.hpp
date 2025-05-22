@@ -69,12 +69,12 @@ public:
 };
 
 AdaptivePID::AdaptivePID():ReferenceModelDerivate_(), PlantDerivative_() {
-    bool adaptive_gains_defined_ = false;
-    bool two_dof_gains_defined_ = false;
-    bool reference_model_gains_defined_ = false;
-    bool adaptive_kp_range_defined_ = false;
-    bool adaptive_ki_range_defined_ = false;
-    bool adaptive_kd_range_defined_ = false;
+    adaptive_gains_defined_ = false;
+    two_dof_gains_defined_ = false;
+    reference_model_gains_defined_ = false;
+    adaptive_kp_range_defined_ = false;
+    adaptive_ki_range_defined_ = false;
+    adaptive_kd_range_defined_ = false;
 
     kp_ = 0;
     ki_ = 0;
@@ -146,13 +146,13 @@ void AdaptivePID::setKpRange(float min_value, float max_value) {
     max_kp_ = max_value;
 }
 
-void AdaptivePID::setKpRange(float min_value, float max_value) {
+void AdaptivePID::setKiRange(float min_value, float max_value) {
     adaptive_ki_range_defined_ = true;
     min_ki_ = min_value;
     max_ki_ = max_value;
 }
 
-void AdaptivePID::setKpRange(float min_value, float max_value) {
+void AdaptivePID::setKdRange(float min_value, float max_value) {
     adaptive_kd_range_defined_ = true;
     min_kd_ = min_value;
     max_kd_ = max_value;
