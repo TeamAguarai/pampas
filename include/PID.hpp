@@ -3,6 +3,7 @@ PID.hpp
 Creditos: https://github.com/pms67/PID/blob/master/PID.h 
 
 Clase de controlador PID clasico.
+Expresion: PID = Kp * (beta * setpoint - measured) + Ki * integral_error + Kd * (gamma * setpoint - measured - prev_output) / dt
 
 Ejemplo de uso:
 PID pid_controller;
@@ -16,111 +17,115 @@ while (loop) {
 
 #include <stdexcept>
 
+#ifdef VSCODE_INTELLISENSE_SUPPORT
+#include "Exception.hpp"
+#endif
+
 namespace pampas {    
 
 
 class PID {
 private:
    
-    double tau_;    
+    float derivative_low_pass_filter_constant_;    
 
-    double min_output_;
-    double max_output_;
+    float min_output_;
+    float max_output_;
 
-    double min_output_int_;
-    double max_output_int_;
+    float min_integral_;
+    float max_integral_;
 
-    double sample_time_;
-
-    double integrator_ = 0;
-    double prev_error_ = 0;
-    double differentiator_ = 0;
-    double prev_measurement_ = 0;
-
-    double out_;
-
+    float prev_error_;
+    float integral_;
+    
     bool gains_defined_ = false;
     bool params_defined_ = false;
 
-public:
-    double kp_;     
-    double ki_;     
-    double kd_;  
+    float kp_;     
+    float ki_;     
+    float kd_;  
 
+public:
     PID();
-    void setGains(double kp, double ki, double kd);
+
+    /* Getters */
+    float getKp();
+    float getKi();
+    float getKd();
+    float calculate(float setpoint, float measurement, float sample_time);
+
+    /* Setters */
+    void setGains(float kp, float ki, float kd);
+    void setParameters(float derivative_low_pass_filter_constant, float min_output, float max_output, float min_output_int, float max_output_int);
     void reset();
-    void setParameters(double tau, double min_output, double max_output, double min_output_int, double max_output_int);
-    double calculate(double setpoint, double measurement, double sample_time);
+    
 };
 
-PID::PID() 
-{
-    integrator_ = 0.0f;
+PID::PID() {
+    integral_ = 0.0f;
     prev_error_ = 0.0f;
-    differentiator_ = 0.0f;
-    prev_measurement_ = 0.0f;
-    out_ = 0.0f;
 }
 
 void PID::reset() {
-    integrator_ = 0.0f;
+    integral_ = 0.0f;
     prev_error_ = 0.0f;
-    differentiator_ = 0.0f;
-    prev_measurement_ = 0.0f;
-    out_ = 0.0f;
 }
 
-double PID::calculate(double setpoint, double measurement, double sample_time_) 
-{
-    if (!gains_defined_) throw std::invalid_argument( "Faltan definir las ganancias del controlador PID" );
-    if (!params_defined_) throw std::invalid_argument( "Faltan definir los parametros del controlador PID" );
+float PID::calculate(float setpoint, float measurement, float sample_time_) {
+    if (!gains_defined_) EXCEPTION("Faltan definir las ganancias del controlador PID");
+    if (!params_defined_) EXCEPTION( "Faltan definir los parametros del controlador PID");
 
-    double error = setpoint - measurement;
-    double proportional = kp_ * error;
-    integrator_ += 0.5f * ki_ * sample_time_ * (error + prev_error_);
+    float error = setpoint - measurement;
+    float proportional = kp_ * error;
 
-    if (integrator_ > max_output_int_) {
-        integrator_ = max_output_int_;
-    } else if (integrator_ < min_output_int_) {
-        integrator_ = min_output_int_;
+    integral_ += (error + prev_error_) *  sample_time_;
+    if (integral_ > max_integral_) {
+        integral_ = max_integral_;
+    } else if (integral_ < min_integral_) {
+        integral_ = min_integral_;
     }
 
-    // Derivativo (filtro de paso bajo)
-    differentiator_ = -(2.0f * kd_ * (measurement - prev_measurement_) +
-                       (2.0f * tau_ - sample_time_) * differentiator_) /
-                     (2.0f * tau_ + sample_time_);
+    float derivative = (error - prev_error_) / sample_time_;
 
-    out_ = proportional + integrator_ + differentiator_;
+    float out = proportional + integral_ + derivative;
 
-    if (out_ > max_output_) {
-        out_ = max_output_;
-    } else if (out_ < min_output_) {
-        out_ = min_output_;
+    if (out > max_output_) {
+        out = max_output_;
+    } else if (out < min_output_) {
+        out = min_output_;
     }
 
     prev_error_ = error;
-    prev_measurement_ = measurement;
 
-    return out_;
+    return out;
 }
 
-void PID::setGains(double kp, double ki, double kd) 
-{
+void PID::setGains(float kp, float ki, float kd) {
     gains_defined_ = true;
     kp_ = kp;
     ki_ = ki;
     kd_ = kd;
 }
 
-void PID::setParameters(double tau_, double min_output_, double max_output_, double min_output_int_, double max_output_int_) 
-{
+void PID::setParameters(float derivative_low_pass_filter_constant, float min_output_, float max_output_, float min_integral_, float max_integral_) {
     params_defined_ = true;
-    tau_ = tau_;
+    derivative_low_pass_filter_constant_ = derivative_low_pass_filter_constant;
     min_output_ = min_output_;
     max_output_ = max_output_;
-    min_output_int_ = min_output_int_;
-    max_output_int_ = max_output_int_;
+    min_integral_ = min_integral_;
+    max_integral_ = max_integral_;
+}
+
+float PID::getKp() {
+    return kp_;
+}
+
+float PID::getKi() {
+    return ki_;
+}
+
+float PID::getKd() {
+    return kd_;
 }
 
 }
