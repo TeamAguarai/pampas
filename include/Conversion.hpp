@@ -1,16 +1,19 @@
 /*
 Conversion.hpp
 
-Clase para gestionar las conversion de valores Ancho de pulso (PWM - nano segundos) a Velocidad (m/s).
+Class for converting between pulse width (PWM in nanoseconds) and velocity (m/s) using a transfer function.
 
-Ejemplo de uso:
+Example usage:
 Conversion conversion;
 conversion.set(least_square_function);
 data = conversion.convert(value);
 
-ToDo: mejorar mensaje de error para funcion no definida.
+ToDo: improve error message when function is not defined.
 */
 
+#ifdef VSCODE_INTELLISENSE_SUPPORT
+#include "Exception.hpp"
+#endif 
 
 #include <functional>
 #include <stdexcept>
@@ -19,31 +22,32 @@ ToDo: mejorar mensaje de error para funcion no definida.
 namespace pampas {
 
 class Conversion {
+public:
+    void set(std::function<double(double)> func);
+    double convert(double input);
+    bool isDefined();
+
 private:
     std::function<double(double)> transfer_function_;
     bool defined_ = false;
-public:
-    void set(std::function<double(double)> func);
-    bool isDefined();
-    double convert(double input);
+    
 };
 
-bool Conversion::isDefined() 
-{
-    return this->defined_;
+/* Returns whether a conversion function has been defined */
+bool Conversion::isDefined() {
+    return defined_;
 }
 
-void Conversion::set(std::function<double(double)> func) 
-{
-    this->defined_ = true;
-    this->transfer_function_ = func;
-    
+/* Sets the conversion transfer function */
+void Conversion::set(std::function<double(double)> func) {
+    defined_ = true;
+    transfer_function_ = func;
 }
 
-double Conversion::convert(double input) 
-{
-    if (!this->defined_) throw std::runtime_error("Función de conversión no definida.");
-    return this->transfer_function_(input);
+/* Applies the conversion function to the input value */
+double Conversion::convert(double input) {
+    if (!defined_) EXCEPTION("Conversion function is not defined.");
+    return transfer_function_(input);
 }
 
 } // namespace pampas

@@ -16,9 +16,9 @@ namespace pampas {
 class PulseWidth
 {
 public:
-    float min_ = -1; 
-    float max_ = -1;
-    float steady_ = -1;
+    float min_; 
+    float max_;
+    float steady_;
     void set(float min, float steady, float max);
     bool isDefined();
     float validate(float pulseWidthMs);

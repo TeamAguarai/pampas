@@ -1,13 +1,13 @@
 /*
 Exception.hpp
 
-Manejo de mensajes de error.
-
+Basic error handling utility.
+Throws a runtime_error with a custom message including file and line information.
 */
 
 #include <iostream>
 #include <stdexcept>
 
-/* Levanta un runtime_error que incluye un mensaje y detalles del archivo y linea */
+/* Throws a std::runtime_error including the file name, line number, and a custom message */
 #define EXCEPTION(msg) \
-    throw std::runtime_error(std::string("ERROR en ") + __FILE__ + ":" + std::to_string(__LINE__) + " → " + msg)
+    throw std::runtime_error(std::string("ERROR in ") + __FILE__ + ":" + std::to_string(__LINE__) + " → " + msg)
