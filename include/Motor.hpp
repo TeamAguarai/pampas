@@ -1,65 +1,66 @@
 /*
 Motor.hpp
 
-Clase para accionar el motor del HYPER VS 1/8 BUGGY NITRO.
+Class to control the motor of the HYPER VS 1/8 BUGGY NITRO.
 
-Ejemplo de uso:
+Example usage:
 Motor motor;
 motor.setPin(...);
 motor.setPulseWidthRange(...);
 motor.setPulseWidth(value);
-
 */
 
 #ifdef VSCODE_INTELLISENSE_SUPPORT
 #include "PulseWidth.hpp"
 #include "gpio.hpp"
+#include "Exception.hpp"
 #endif
-    
+
 #include <csignal>
 #include <stdexcept>
 
 namespace pampas {
-    
-class Motor
-{
+
+class Motor {
 public:
     Motor();
-    ~Motor();
     void setPin(int pin);
-    void setPulseWidthRange(double min, double steady, double max);
-    void setPulseWidth(double pulseWidth);
-    void cleanup();
+    void setPulseWidthRange(float min, float steady, float max);
+    void setPulseWidth(float pulseWidth);
+    void steady();
+
     PulseWidth pulseWidth_;
 
 private:
-    int pin = -1;
+    int pin_ = -1;
 };
 
+// --- Implementation ---
 
+/* Default constructor */
 Motor::Motor() {}
 
-void Motor::cleanup() 
-{
-    this->setPulseWidth(this->pulseWidth_.steady);
+/* Sets the motor pin to the steady PWM value */
+void Motor::steady() {
+    setPulseWidth(pulseWidth_.steady_);
 }
 
-void Motor::setPin(int pin) 
-{
-    this->pin = pin;
-    gpio::pinMode(pin, PWM_OUTPUT); // PWM_OUTPUT is a wiringPi constant
+/* Sets the GPIO pin used for PWM output */
+void Motor::setPin(int pin) {
+    pin_ = pin;
+    gpio::pinMode(pin_, PWM_OUTPUT);
 }
 
-void Motor::setPulseWidthRange(double min, double steady, double max) {
-    this->pulseWidth_.set(min, steady, max);
+/* Sets the minimum, steady, and maximum pulse widths */
+void Motor::setPulseWidthRange(float min, float steady, float max) {
+    pulseWidth_.set(min, steady, max);
 }
 
-void Motor::setPulseWidth(double pulseWidth) 
-{
-    if (this->pulseWidth_.isDefined() == false) throw std::invalid_argument( "Faltan definir los valores de ancho de pulso." );
-    if (this->pin == -1) throw std::invalid_argument( "Faltan definir el pin del motor" );
-
-    gpio::pwmWrite(this->pin, this->pulseWidth_.validate(pulseWidth));
+/* Applies a validated PWM pulse width to the motor */
+void Motor::setPulseWidth(float pulseWidth) {
+    if (!pulseWidth_.isDefined()) throw EXCEPTION("Pulse width values must be defined.");
+    if (pin_ == -1) throw EXCEPTION("Motor pin has not been set.");
+    gpio::pwmWrite(pin_, pulseWidth_.validate(pulseWidth));
 }
 
 } // namespace pampas

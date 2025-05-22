@@ -32,16 +32,18 @@ governor.run(SPEED);
 */
 
 #ifdef VSCODE_INTELLISENSE_SUPPORT
-#include "Motor.hpp"
 #include "Velocimeter.hpp"
 #include "PID.hpp"
+#include "AdaptivePID.hpp"
 #include "Conversion.hpp"
 #include "gpio.hpp"
+#include "Motor.hpp"
 #endif
 
 #include <thread>
 #include <iostream>
 #include <functional>
+#include <variant>
 
 namespace pampas {
 
@@ -52,21 +54,20 @@ enum CONTROL {
 
 class Governor {
 public:
-    Governor(Motor motor, PID pid_controller, Velocimeter velocimeter, Conversion ms_to_pulsewidth_conversion);
+    Governor(Motor motor, std::variant<PID, AdaptivePID> pid_controller, Velocimeter velocimeter, Conversion ms_to_pulsewidth_conversion);
     void run(float speed);
     void stop();
 
 private:
     Motor motor_;
-    PID pid_controller_;
+    std::variant<PID, AdaptivePID> pid_controller_;
     Velocimeter velocimeter_;
     Conversion ms_to_pulsewidth_conversion_;
     std::thread control_thread_;
-    
-    bool running_ = false;
-    float running_speed_ = 0;
 
     void runAtControlledSpeed(float speed);
+    bool running_;
+    float running_speed_;
 };
 
 // --- Implementation ---
@@ -74,7 +75,7 @@ private:
 /* Constructor: stores all components and initializes GPIO */
 Governor::Governor(
     Motor motor, 
-    PID pid_controller, 
+    std::variant<PID, AdaptivePID> pid_controller, 
     Velocimeter velocimeter, 
     Conversion ms_to_pulsewidth_conversion)
     : motor_(motor), 
@@ -83,6 +84,8 @@ Governor::Governor(
       ms_to_pulsewidth_conversion_(ms_to_pulsewidth_conversion)
 {
     gpio::setupGpioPinout();
+    bool running_ = false;
+    float running_speed_ = 0;
 }
 
 /* Stops the control loop and joins the thread if running */
@@ -120,13 +123,13 @@ void Governor::runAtControlledSpeed(float speed) {
 
 /* Starts the control thread at the specified speed. Stops previous one if running. */
 void Governor::run(float speed) {
-    if (speed == this->running_speed_) return;
+    if (speed == running_speed_) return;
 
     this->stop();
-    this->running_speed_ = speed;
-    this->running_ = true;
+    running_speed_ = speed;
+    running_ = true;
 
-    this->control_thread_ = std::thread(&Governor::runAtControlledSpeed, this, speed);
+    control_thread_ = std::thread(&Governor::runAtControlledSpeed, this, speed);
 }
 
 } // namespace pampas
