@@ -99,7 +99,7 @@ void Governor::runAtControlledSpeed(float speed) {
     velocimeter_.start();
     velocimeter_.waitForUpdate();
 
-    while (this->running_) {
+    while (running_) {
         velocimeter_.start();
         velocimeter_.waitForUpdate();
 
