@@ -11,33 +11,40 @@
 using namespace pampas;
 
 int main() {
+    // --- PIN setup ---
+    gpio::setupGpioPinout();
+    
     // --- Motor setup ---
     Motor motor;
-    motor.setPulseWidthRange(1.0f, 1.5f, 2.0f); // min, steady, max
-    motor.setPin(13); 
+    motor.setPulseWidthRange(1.0f, 1.5f, 1.8f); // min, steady, max
+    motor.setPin(18); 
 
     // --- PID setup ---
-    float kp_inicial = askInput("Ingrese valor inicial de Kp: ");
-    float ki_inicial = askInput("Ingrese valor inicial de Ki: ");
-    float kd_inicial = askInput("Ingrese valor inicial de Kd: ");
-    float tau = askInput("Ingrese tau (filtro paso bajo): ");
-    float salida_min_pid = askInput("Ingrese salida min PID: ");
-    float salida_max_pid = askInput("Ingrese salida max PID: ");
-    float integral_min = askInput("Ingrese integral min PID: ");
-    float integral_max = askInput("Ingrese integral max PID: ");
+    float setpoint = askInput("Ingrese el setpoint: ");
+    float omega_n = askInput("Ingrese omega_n (MD): ");
+    float zeta = askInput("Ingrese zeta (MD): ");
+    float kp_inicial = 0.2786;
+    float ki_inicial = 0.2965;
+    float kd_inicial = 0.0115;
+    
+    float salida_min_pid = 0.1;
+    float salida_max_pid = 3;
+    float integral_min = -5;
+    float integral_max = 8;
+
     float gamma_p = askInput("Ingrese gamma_p (Adaptativo): ");
     float gamma_i = askInput("Ingrese gamma_i (Adaptativo): ");
     float gamma_d = askInput("Ingrese gamma_d (Adaptativo): ");
-    float min_kp = askInput("Ingrese Kp minimo (Adaptativo): ");
-    float min_ki = askInput("Ingrese Ki minimo (Adaptativo): ");
-    float min_kd = askInput("Ingrese Kd minimo (Adaptativo): ");
-    float max_kp = askInput("Ingrese Kp maximo (Adaptativo): ");
-    float max_ki = askInput("Ingrese Ki maximo (Adaptativo): ");
-    float max_kd = askInput("Ingrese Kd maximo (Adaptativo): ");
-    float omega_n = askInput("Ingrese omega_n (MD): ");
-    float zeta = askInput("Ingrese zeta (MD): ");
-    float beta = askInput("Ingrese beta (2DOF): ");
+    float min_kp = 0;
+    float min_ki = 0;
+    float min_kd = -1;
+    float max_kp = 2;
+    float max_ki = 8;
+    float max_kd = 0.03;
+    float tau = askInput("Ingrese tau (filtro paso bajo): ");
     float gamma = askInput("Ingrese gamma (2DOF): ");
+    float beta = askInput("Ingrese beta (2DOF): ");
+    
 
     AdaptivePID pid;
     pid.setGains(kp_inicial, ki_inicial, kd_inicial); // valores iniciales
@@ -57,7 +64,7 @@ int main() {
 
     // --- Conversion setup ---
     Conversion ms_to_pwm;
-    ms_to_pwm.set([](double value) -> double {
+    ms_to_pwm.set([](double x) -> double {
         return 1.5406368187143187 
         + (0.2630704132809448) * pow(x, 1)
         + (-0.7839709920881821) * pow(x, 2)
@@ -75,7 +82,13 @@ int main() {
     // --- Governor ---
     Governor governor(motor, pid, velocimeter, ms_to_pwm);
 
-    governor.run(2.5f);  // velocidad deseada en m/s
+    std::cout << "\n---- INICIO SETPOINT ----\n";
+
+    while (true)
+    {
+        governor.run(setpoint);  // velocidad deseada en m/s
+    }
+    
 
     return 0;
 }

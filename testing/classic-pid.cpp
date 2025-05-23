@@ -11,20 +11,25 @@
 using namespace pampas;
 
 int main() {
+    // --- PIN setup ---
+    gpio::setupGpioPinout();
+    
     // --- Motor setup ---
     Motor motor;
     motor.setPulseWidthRange(1.0f, 1.5f, 2.0f); // min, steady, max
-    motor.setPin(13); 
+    motor.setPin(18); 
 
     // --- PID setup ---
+    float setpoint = askInput("Ingrese el setpoint: "); 
     float kp = askInput("Ingrese kp: ");
     float ki = askInput("Ingrese ki: ");
     float kd = askInput("Ingrese kd: ");
     float tau = askInput("Ingrese tau (filtro paso bajo): ");
-    float salida_min_pid = askInput("Ingrese salida min PID: ");
-    float salida_max_pid = askInput("Ingrese salida max PID: ");
-    float integral_min = askInput("Ingrese integral min: ");
-    float integral_max = askInput("Ingrese integral max: ");
+    float salida_min_pid = 0;
+    float salida_max_pid = setpoint + 1;
+    float integral_min = -setpoint * 0.8;
+    float integral_max = setpoint * 0.8;
+
     PID pid;
     pid.setGains(kp, ki, kd);
     pid.setParameters(tau, salida_min_pid, salida_max_pid, integral_min, integral_max);
@@ -37,7 +42,7 @@ int main() {
 
     // --- Conversion setup (simple lineal: x => x) ---
     Conversion ms_to_pwm;
-    ms_to_pwm.set([](double value) -> double {
+    ms_to_pwm.set([](double x) -> double {
         return 1.5406368187143187 
         + (0.2630704132809448) * pow(x, 1)
         + (-0.7839709920881821) * pow(x, 2)
@@ -55,7 +60,9 @@ int main() {
     // --- Governor ---
     Governor governor(motor, pid, velocimeter, ms_to_pwm);
 
-    governor.run(2.5f);  // velocidad deseada en m/s
+    while (true) {
+        governor.run(setpoint);  // velocidad deseada en m/s
+    }
 
     return 0;
 }
