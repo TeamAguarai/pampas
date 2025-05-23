@@ -42,7 +42,7 @@ protected:
 
     Derivative ErrorDerivative_;
     Integral ErrorIntegral_;
-    LowPass DerivativeFilter_;
+    LowPass<float> DerivativeFilter_;
 
     float beta_;   // For 2DOF PID
     float gamma_;  // For 2DOF PID
@@ -59,13 +59,18 @@ public:
     void setGains(float kp, float ki, float kd);
     void setParameters(float derivative_low_pass_filter_constant, float min_output, float max_output, float min_integral, float max_integral);
     void reset();
+
+    enum class Type {
+        CLASSIC,
+        ADAPTIVE
+    };
 };
 
 // --- Implementation ---
 
 /* Default constructor: initializes internal states and resets integrator/derivator */
 PID::PID():DerivativeFilter_() {
-    Derivative.setInitialValue(0);
+    DerivativeFilter_.setInitialValue(0);
     ErrorDerivative_.reset();
     ErrorIntegral_.reset();
 }
@@ -84,12 +89,12 @@ float PID::calculate(float setpoint, float measurement, float sample_time_) {
     float error = setpoint - measurement;
 
     float proportional = kp_ * error;
-    float integral = ki_ * ErrorIntegral_.compute(error, sample_time_, min_integral_, max_integral_);
+    float integral = std::clamp(ki_ * ErrorIntegral_.compute(error, sample_time_), min_integral_, max_integral_);
     float derivative = DerivativeFilter_.filter(kd_ * ErrorDerivative_.compute(error, sample_time_));
 
-    float out = proportional + integral + derivative;
+    std::cout << "\n\nPID Math: " << proportional << " + " << integral << " + " << derivative << "\n";
 
-    std::clamp(out, min_output_, max_output_);
+    float out = std::clamp(proportional + integral + derivative, min_output_, max_output_);
 
     return out;
 }
@@ -106,6 +111,7 @@ void PID::setGains(float kp, float ki, float kd) {
 void PID::setParameters(float derivative_low_pass_filter_constant, float min_output, float max_output, float min_integral, float max_integral) {
     params_defined_ = true;
     derivative_low_pass_filter_constant_ = derivative_low_pass_filter_constant;
+    DerivativeFilter_.setAlpha(derivative_low_pass_filter_constant);
     min_output_ = min_output;
     max_output_ = max_output;
     min_integral_ = min_integral;

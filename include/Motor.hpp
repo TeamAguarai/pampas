@@ -42,7 +42,7 @@ Motor::Motor() {}
 
 /* Sets the motor pin to the steady PWM value */
 void Motor::steady() {
-    setPulseWidth(pulseWidth_.steady_);
+    setPulseWidth(pulseWidth_.getSteady());
 }
 
 /* Sets the GPIO pin used for PWM output */
@@ -58,8 +58,8 @@ void Motor::setPulseWidthRange(float min, float steady, float max) {
 
 /* Applies a validated PWM pulse width to the motor */
 void Motor::setPulseWidth(float pulseWidth) {
-    if (!pulseWidth_.isDefined()) throw EXCEPTION("Pulse width values must be defined.");
-    if (pin_ == -1) throw EXCEPTION("Motor pin has not been set.");
+    if (!pulseWidth_.isDefined()) EXCEPTION("Pulse width values must be defined.");
+    if (pin_ == -1) EXCEPTION("Motor pin has not been set.");
     gpio::pwmWrite(pin_, pulseWidth_.validate(pulseWidth));
 }
 

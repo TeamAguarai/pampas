@@ -47,23 +47,22 @@ governor.run(SPEED);
 
 namespace pampas {
 
-enum CONTROL {
-    CLASSIC,
-    ADAPTATIVE
-};
-
 class Governor {
 public:
-    Governor(Motor motor, std::variant<PID, AdaptivePID> pid_controller, Velocimeter velocimeter, Conversion ms_to_pulsewidth_conversion);
+    Governor(Motor &motor, PID classic_pid_controller, Velocimeter &velocimeter, Conversion &ms_to_pulsewidth_conversion);
+    Governor(Motor &motor, AdaptivePID adaptive_pid_controller, Velocimeter &velocimeter, Conversion &ms_to_pulsewidth_conversion);
     void run(float speed);
     void stop();
-
 private:
-    Motor motor_;
-    std::variant<PID, AdaptivePID> pid_controller_;
-    Velocimeter velocimeter_;
-    Conversion ms_to_pulsewidth_conversion_;
+    Motor &motor_;
+    Velocimeter &velocimeter_;
+    Conversion &ms_to_pulsewidth_conversion_;
+
+    PID classic_pid_controller_;
+    AdaptivePID adaptive_pid_controller_;
+    
     std::thread control_thread_;
+    PID::Type controller_type_;
 
     void runAtControlledSpeed(float speed);
     bool running_;
@@ -72,52 +71,83 @@ private:
 
 // --- Implementation ---
 
-/* Constructor: stores all components and initializes GPIO */
+/* Constructor for classic PID: stores all components and initializes GPIO */
 Governor::Governor(
-    Motor motor, 
-    std::variant<PID, AdaptivePID> pid_controller, 
-    Velocimeter velocimeter, 
-    Conversion ms_to_pulsewidth_conversion)
+    Motor &motor, 
+    PID classic_pid_controller, 
+    Velocimeter &velocimeter, 
+    Conversion &ms_to_pulsewidth_conversion)
     : motor_(motor), 
-      pid_controller_(pid_controller), 
+      classic_pid_controller_(classic_pid_controller), 
       velocimeter_(velocimeter), 
       ms_to_pulsewidth_conversion_(ms_to_pulsewidth_conversion)
 {
     gpio::setupGpioPinout();
     bool running_ = false;
     float running_speed_ = 0;
+    controller_type_ = PID::Type::CLASSIC;
+}
+
+/* Constructor for adaptive PID: stores all components and initializes GPIO */
+Governor::Governor(
+    Motor &motor, 
+    AdaptivePID adaptive_pid_controller, 
+    Velocimeter &velocimeter, 
+    Conversion &ms_to_pulsewidth_conversion)
+    : motor_(motor), 
+      adaptive_pid_controller_(adaptive_pid_controller), 
+      velocimeter_(velocimeter), 
+      ms_to_pulsewidth_conversion_(ms_to_pulsewidth_conversion)
+{
+    gpio::setupGpioPinout();
+    running_ = false;
+    running_speed_ = 0;
+    controller_type_ = PID::Type::ADAPTIVE;
 }
 
 /* Stops the control loop and joins the thread if running */
 void Governor::stop() {
     running_ = false;
-    if (control_thread_.joinable()) control_thread_.join();
+    // if (control_thread_.joinable()) control_thread_.join();
 }
 
 /* Control loop that adjusts motor speed based on PID and velocity feedback */
 void Governor::runAtControlledSpeed(float speed) {
+
+    motor_.setPulseWidth(ms_to_pulsewidth_conversion_.convert(speed)); // arranque al sistema
+
     velocimeter_.start();
     velocimeter_.waitForUpdate();
-
+    
+    float pid_output;
+    
     while (running_) {
         velocimeter_.start();
         velocimeter_.waitForUpdate();
 
-        float newSpeed = pid_controller_.calculate(
-            speed,
-            velocimeter_.getSpeed(),
-            velocimeter_.getUpdateTimeInterval()
-        );
+        if (controller_type_ == PID::Type::CLASSIC) {
+            pid_output = classic_pid_controller_.calculate(speed, velocimeter_.getSpeed(), velocimeter_.getUpdateTimeInterval());
+        } else {
+            pid_output = adaptive_pid_controller_.calculate(speed, velocimeter_.getSpeed(), velocimeter_.getUpdateTimeInterval());
+        }
 
-        motor_.setPulseWidth(ms_to_pulsewidth_conversion_.convert(newSpeed));
+        motor_.setPulseWidth(ms_to_pulsewidth_conversion_.convert(pid_output));
 
         std::cout << "SetPoint (" << speed << ") | "
                   << "Velocimeter (" << velocimeter_.getSpeed() << ") | "
-                  << "PID (" << newSpeed << ") | "
-                  << "KP(" << pid_controller_.getKp() << ") | "
-                  << "KI(" << pid_controller_.getKi() << ") | "
-                  << "KD(" << pid_controller_.getKd() << ") | "
-                  << "dt(" << velocimeter_.getUpdateTimeInterval() << ")\n";
+                  << "PID (" << pid_output << ") | "
+                  << "dt(" << velocimeter_.getUpdateTimeInterval() << ") | ";
+                  
+        if (controller_type_ == PID::Type::CLASSIC) {
+            std::cout << "KP CTE(" << classic_pid_controller_.getKp() << ") | " 
+                      << "KI CTE(" << classic_pid_controller_.getKi() << ") | "
+                      << "KD CTE(" << classic_pid_controller_.getKd() << ")\n";
+        } else {
+            std::cout << "KP ADAP(" << adaptive_pid_controller_.getKp() << ") | " 
+                      << "KI ADAP(" << adaptive_pid_controller_.getKi() << ") | "
+                      << "KD ADAP(" << adaptive_pid_controller_.getKd() << ")\n";
+        }
+            
     }
 }
 
@@ -128,8 +158,9 @@ void Governor::run(float speed) {
     this->stop();
     running_speed_ = speed;
     running_ = true;
-
+    
     control_thread_ = std::thread(&Governor::runAtControlledSpeed, this, speed);
+    // control_thread_.join();
 }
 
 } // namespace pampas
