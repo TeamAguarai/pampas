@@ -8,7 +8,7 @@ Includes clamping to prevent integral wind-up.
 
 class Integral {
 public:
-    float compute(float currentValue, float dt, float min, float max);
+    float compute(float currentValue, float dt);
     void reset();
     float get() const;
 
@@ -21,10 +21,8 @@ private:
 /* Computes and returns the integral using the rectangular method.
    Accumulates the product of current value and dt.
    Clamps the result between min and max to prevent wind-up. */
-float Integral::compute(float currentValue, float dt, float min, float max) {
+float Integral::compute(float currentValue, float dt) {
     accumulated_ += currentValue * dt;
-    if (accumulated_ > max) accumulated_ = max;
-    if (accumulated_ < min) accumulated_ = min;
     return accumulated_;
 }
 

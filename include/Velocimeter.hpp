@@ -1,7 +1,7 @@
-#ifdef USING_VSCODE_AS_EDITOR
-    #include "LowPass.h"
-    #include "gpio.h"
-    #include "operations.h"
+#ifdef VSCODE_INTELLISENSE_SUPPORT
+#include "LowPass.hpp"
+#include "gpio.hpp"
+#include "operations.hpp"
 #endif
 
 #include <time.h>
@@ -40,7 +40,7 @@ public:
     double getDistance();
     void resetDistance();
 
-    void waitForUpdate(double timeoutSeconds = 2.0f);
+    void waitForUpdate(double timeoutSeconds = 1.0f);
     void start(); // este metodo debe llamarse al iniciar las mediciones de velocidad
     void cleanup(); // llamar si o si a este metodo al final del programa, en caso de un programa abortado ejecutara automaticamente.
 };
@@ -107,9 +107,8 @@ void Velocimeter::start()
 {
     this->udpated = false;
     if (this->started == true) return;
-
     clock_gettime(CLOCK_MONOTONIC, &this->startTime);
-
+    
     gpio::pinMode(this->pin, INPUT);
     gpio::onInterrupt(this->pin, INT_EDGE_RISING, &pulseHandlerWrapper);
     

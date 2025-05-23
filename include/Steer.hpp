@@ -4,7 +4,6 @@ Steer.cpp
 Clase para controlar la direccion del HYPER VS 1/8 BUGGY NITRO a traves de su servo motor.
 
 
-*/
 
 #ifdef VSCODE_INTELLISENSE_SUPPORT
 #include "Motor.hpp"
@@ -50,3 +49,4 @@ void Steer::steer(double value, double proportionalConstant) // -1 < value < 1
 }
 
 }
+*/

@@ -60,7 +60,7 @@ public:
     float getGamma();
     float calculate(float setpoint, float measurement, float sample_time);
     
-    float setReferenceModel(float omega_n, float zeta);
+    void setReferenceModel(float omega_n, float zeta);
     void setAdaptiveGains(float Gp, float Gi, float Gd);
     void setKpRange(float min_value, float max_value);
     void setKiRange(float min_value, float max_value);
@@ -95,6 +95,8 @@ float AdaptivePID::calculate(float setpoint, float measurement, float sample_tim
     dv_m_ += ddv_m * sample_time_;
     reference_model_setpoint_ += dv_m_ * sample_time_;
     
+    reference_model_setpoint_ = std::clamp(reference_model_setpoint_, 0.0d, setpoint*1.2);
+
     ReferenceModelDerivate_.compute(reference_model_setpoint_, sample_time_);
     PlantDerivative_.compute(measurement, sample_time_);
     float D_err = gamma_ * ReferenceModelDerivate_.get() - PlantDerivative_.get();
@@ -105,16 +107,17 @@ float AdaptivePID::calculate(float setpoint, float measurement, float sample_tim
     kp_ += Gp_ * error * (beta_*setpoint - measurement) * sample_time_;
     ki_ += Gi_ * error * error * sample_time_;
     kd_ += Gd_ * error * D_err * sample_time_;
-    std::clamp(kp_, min_kp_, max_kp_);
-    std::clamp(ki_, min_ki_, max_ki_);
-    std::clamp(kd_, min_kd_, max_kd_);
+    kp_ = std::clamp(kp_, min_kp_, max_kp_);
+    ki_ = std::clamp(ki_, min_ki_, max_ki_);
+    kd_ = std::clamp(kd_, min_kd_, max_kd_);
 
     float proportional = kp_ * (beta_*setpoint - measurement);
-    float integral_ = ki_ * ErrorIntegral_.compute(error, sample_time_, min_integral_, max_integral_);
+    float integral = std::clamp(ki_ * ErrorIntegral_.compute(error, sample_time_), min_integral_, max_integral_);
     float derivative = kd_ * ErrorDerivative_.compute(error, sample_time_);
 
-    float out = proportional + integral_ + derivative;
-    std::clamp(out, min_output_, max_output_);
+    std::cout << "\n\nPID Math: " << proportional << " + " << integral << " + " << derivative << "\n";
+    std::cout << "MD: " << reference_model_setpoint_ << "\n";
+    float out = std::clamp(proportional + integral + derivative, min_output_, max_output_);
 
     return out;
 }
@@ -134,7 +137,7 @@ void AdaptivePID::setTwoDofGains(float beta, float gamma) {
     two_dof_gains_defined_ = true;
 }
 
-float AdaptivePID::setReferenceModel(float omega_n, float zeta) {
+void AdaptivePID::setReferenceModel(float omega_n, float zeta) {
     omega_n_ = omega_n;
     zeta_ = zeta;
     reference_model_gains_defined_ = true;

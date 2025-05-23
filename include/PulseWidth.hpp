@@ -29,6 +29,9 @@ public:
     bool isDefined();
     float validate(float pulseWidthMs);
     float fromPercentage(float percent);
+    float getMin();
+    float getMax();
+    float getSteady();
 };
 
 PulseWidth::PulseWidth() {
@@ -61,6 +64,17 @@ float PulseWidth::fromPercentage(float percent) {
     if (percent < 0.0f) percent = 0.0f;
     if (percent > 1.0f) percent = 1.0f;
     return min_ + percent * (max_ - min_);
+}
+
+float PulseWidth::getMin() {
+    return min_;
+}
+
+float PulseWidth::getMax() {
+    return max_;
+}
+float PulseWidth::getSteady() {
+    return steady_;
 }
 
 } // namespace pampas

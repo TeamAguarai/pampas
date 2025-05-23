@@ -10,7 +10,7 @@ void hello();
 
 float askInput(const std::string& label) {
     float value;
-    std::cout << "Ingrese el valor de " << label << ": ";
+    std::cout << label;
     std::cin >> value;
     return value;
 }
