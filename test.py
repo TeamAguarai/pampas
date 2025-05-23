@@ -5,7 +5,7 @@ import sys
 
 # --- Verificación de argumentos ---
 if len(sys.argv) != 4:
-    print("Uso: python generate_and_build.py archivo_prueba carpeta_destino nombre_ejecutable")
+    print("Uso: python merge.py archivo_prueba carpeta_destino nombre_ejecutable")
     sys.exit(1)
 
 test_name = sys.argv[1]
@@ -30,7 +30,7 @@ os.makedirs(target_dir, exist_ok=True)
 
 # --- Crear makefile con el nombre del ejecutable dado ---
 makefile_content = f"""all:
-\tg++ {os.path.basename(file_to_test)} pampas.cpp -o {output} -lwiringPi
+\tg++ {os.path.basename(file_to_test)} -o {output} -lwiringPi
 \tsudo ./{output}
 """
 
