@@ -2,7 +2,7 @@
 .tmp.drivedownload
 
 # para vscode extension de cpp
-.vscode
+# .vscode
 
 # archivos de desarrollo interno
 wiringPi.h 
