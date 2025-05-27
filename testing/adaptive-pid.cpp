@@ -27,7 +27,7 @@ int main() {
     float ki_inicial = 0.2965;
     float kd_inicial = 0.0115;
     
-    float salida_min_pid = 0.1;
+    float salida_min_pid = 0.5;
     float salida_max_pid = 3;
     float integral_min = -5;
     float integral_max = 8;

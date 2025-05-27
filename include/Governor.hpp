@@ -114,7 +114,7 @@ void Governor::stop() {
 /* Control loop that adjusts motor speed based on PID and velocity feedback */
 void Governor::runAtControlledSpeed(float speed) {
 
-    motor_.setPulseWidth(ms_to_pulsewidth_conversion_.convert(speed)); // arranque al sistema
+    motor_.setPulseWidth(ms_to_pulsewidth_conversion_.convert(speed * 0.8)); // arranque al sistema
 
     velocimeter_.start();
     velocimeter_.waitForUpdate();

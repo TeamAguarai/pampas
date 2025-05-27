@@ -24,7 +24,7 @@ int main() {
     float kp = askInput("Ingrese kp: ");
     float ki = askInput("Ingrese ki: ");
     float kd = askInput("Ingrese kd: ");
-    float tau = askInput("Ingrese tau (filtro paso bajo): ");
+    float tau = askInput("Ingrese tau (filtro paso bajo derivada): ");
     float salida_min_pid = 0;
     float salida_max_pid = setpoint + 1;
     float integral_min = -setpoint * 0.8;
