@@ -4,21 +4,22 @@
 Controla un vehículo RC como el <a href="https://www.amazon.com/Hobao-HB-VS-C30BU-Hyper-Buggy-Engine/dp/B00MY3ROS2">HYPER VS 1/8 BUGGY NITRO</a> a través de un **Raspberry Pi 3** con *C++*
 </div>
 
-## ⚠️ Instalación
-> El proyecto está diseñado únicamente para un vehículo con características idénticas al [HYPER VS 1/8 BUGGY NITRO](https://www.amazon.com/Hobao-HB-VS-C30BU-Hyper-Buggy-Engine/dp/B00MY3ROS2) y únicamente puede ser instalado en un Raspberry Pi.
+## ⚠️ Uso de header only
+> El proyecto está diseñado únicamente para un vehículo con características idénticas al [HYPER VS 1/8 BUGGY NITRO](https://www.amazon.com/Hobao-HB-VS-C30BU-Hyper-Buggy-Engine/dp/B00MY3ROS2) y únicamente puede ser usado en un Raspberry Pi.
 
-En cualquier carpeta de del Raspberry Pi, clona este repositorio y ejecuta el archivo <a href="https://github.com/TeamAguarai/Control/blob/main/install">install</a> (con permisos de administrador)
+En cualquier carpeta de del Raspberry Pi, clona este repositorio y ejecuta el archivo <a href="https://github.com/TeamAguarai/Control/blob/main/create_header.py">create_header.py</a>
 ```bash
 git clone https://github.com/TeamAguarai/pampas
 cd pampas
 chmod +x install scripts/*
-sudo ./install
+python3 create_header.py
 ```
+Este comando creara el archivo header only necesario para usar la libreria.
 
 ## 🎮 Uso
-Para poder poder compilar tus proyectos asegurate de incluir las banderas -lpampas -lwiringPi
+Para poder poder compilar tus proyectos asegurate de incluir el archivo header only "pampas.hpp" en tu compilacion, asi como la bandera -lwiringPi
 ```bash
-g++ main.cpp -o main -lpampas -lwiringPi
+g++ main.cpp -o main -lwiringPi
 ```
 
 

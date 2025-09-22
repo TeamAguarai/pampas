@@ -1,7 +1,0 @@
-#!/bin/bash
-
-./scripts/wiringPi.sh
-
-./scripts/simplify.sh src include pampas simplified
-
-./scripts/install.sh simplified/pampas.cpp simplified/pampas.h pampas
