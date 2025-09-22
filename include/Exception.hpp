@@ -3,6 +3,10 @@ Exception.hpp
 
 Basic error handling utility.
 Throws a runtime_error with a custom message including file and line information.
+
+Example Usage:
+// when error
+EXCEPTION("ERROR MESSAGE")
 */
 
 #include <iostream>

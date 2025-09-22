@@ -1,3 +1,11 @@
+/*
+Velocimeter.hpp
+
+Dolor de cabeza, codigo dudoso pero funciona.
+Deberia de reformatear la estructura e implentacion de esta clase, su problema
+es que es dificil de seguir la ejecucion de la clase.
+*/
+
 #ifdef VSCODE_INTELLISENSE_SUPPORT
 #include "LowPass.hpp"
 #include "gpio.hpp"

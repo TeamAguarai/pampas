@@ -4,6 +4,9 @@ Derivative.hpp
 Basic class for numerical differentiation of a signal using the backward difference method.
 Intended for use in discrete-time control systems or real-time processing.
 
+Example Usage:
+Derivative ErrorDerivative_;
+float derivative = kd_ * ErrorDerivative_.compute(error, sample_time_);
 */
 
 class Derivative {

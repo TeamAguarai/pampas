@@ -4,6 +4,9 @@ Integral.hpp
 Basic class for numerical integration using the rectangular method.
 Includes clamping to prevent integral wind-up.
 
+Example Usage:
+Integral ErrorIntegral_;
+float integral = ki_ * ErrorIntegral_.compute(error, sample_time_);
 */
 
 class Integral {
